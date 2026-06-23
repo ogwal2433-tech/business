@@ -33,7 +33,7 @@ class DownloadController extends Controller
                 'path' => 'apps/SmartBiz-Windows-Setup.exe',
                 'name' => 'SmartBiz-Windows-Setup.exe',
                 'size' => '80.1 MB',
-                'github_url' => 'https://github.com/ogwal2433-tech/business/releases/download/v1.0.0/SmartBiz-Setup-1.0.0.exe'
+                'github_url' => 'https://github.com/ogwal2433-tech/business/releases/download/v1.0.0/SmartBiz.1.0.0.exe'
             ],
             'mac' => [
                 'path' => 'apps/smartbiz-mac-v2.1.0.dmg',
