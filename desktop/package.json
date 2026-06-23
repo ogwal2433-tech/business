@@ -24,7 +24,7 @@
       "icons/**/*"
     ],
     "win": {
-      "target": ["portable"],
+      "target": ["nsis"],
       "icon": "icons/icon.png"
     },
     "mac": {
