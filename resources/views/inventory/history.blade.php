@@ -83,10 +83,10 @@
     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6m-6 0a2 2 0 01-2-2v-6a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2m-6 0h6" />
     </svg>
-    Inventory Adjustment History
+    {{ __('Inventory Adjustment History') }}
 </h1>
 
-                <p class="text-gray-600">Track all inventory changes, adjustments, and stock movements</p>
+                <p class="text-gray-600">{{ __('Track all inventory changes, adjustments, and stock movements') }}</p>
             </div>
 
         </div>
@@ -102,7 +102,7 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <h3 class="text-sm font-semibold text-red-800">There were {{ $errors->count() }} error(s) with your submission:</h3>
+                    <h3 class="text-sm font-semibold text-red-800">{{ __('There were :count error(s) with your submission:', ['count' => $errors->count()]) }}</h3>
                     <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -133,7 +133,7 @@
         <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-blue-100 text-sm font-medium">Total Adjustments</p>
+                    <p class="text-blue-100 text-sm font-medium">{{ __('Total Adjustments') }}</p>
                     <p class="text-2xl font-bold mt-1">{{ $logs->total() }}</p>
                 </div>
                 <div class="p-3 bg-blue-400/20 rounded-xl">
@@ -147,7 +147,7 @@
         <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-green-100 text-sm font-medium">Stock Increases</p>
+                    <p class="text-green-100 text-sm font-medium">{{ __('Stock Increases') }}</p>
                     <p class="text-2xl font-bold mt-1">{{ $logs->where('type', 'increase')->count() }}</p>
                 </div>
                 <div class="p-3 bg-green-400/20 rounded-xl">
@@ -161,7 +161,7 @@
         <div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-red-100 text-sm font-medium">Stock Decreases</p>
+                    <p class="text-red-100 text-sm font-medium">{{ __('Stock Decreases') }}</p>
                     <p class="text-2xl font-bold mt-1">{{ $logs->where('type', 'decrease')->count() }}</p>
                 </div>
                 <div class="p-3 bg-red-400/20 rounded-xl">
@@ -175,7 +175,7 @@
         <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-purple-100 text-sm font-medium">Unique Products</p>
+                    <p class="text-purple-100 text-sm font-medium">{{ __('Unique Products') }}</p>
                     <p class="text-2xl font-bold mt-1">{{ $logs->unique('product_id')->count() }}</p>
                 </div>
                 <div class="p-3 bg-purple-400/20 rounded-xl">
@@ -190,20 +190,20 @@
     <!-- Adjustment History Table -->
     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800">Recent Adjustments</h2>
+            <h2 class="text-lg font-semibold text-gray-800">{{ __('Recent Adjustments') }}</h2>
         </div>
 
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date & Time</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Adjustment Type</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Quantity Changed</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Stock Movement</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Notes</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('Date & Time') }}</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('Product') }}</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('Adjustment Type') }}</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('Quantity Changed') }}</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('Stock Movement') }}</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('User') }}</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('Notes') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -287,7 +287,7 @@
                                         <span class="text-white text-xs font-medium">{{ substr($log->user->name ?? 'S', 0, 1) }}</span>
                                     </div>
                                     <div class="ml-2">
-                                        <div class="text-sm font-medium text-gray-900">{{ $log->user->name ?? 'System' }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $log->user->name ?? __('System') }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -306,8 +306,8 @@
                                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                     </svg>
-                                    <h3 class="mt-2 text-sm font-medium text-gray-900">No adjustment history found</h3>
-                                    <p class="mt-1 text-sm text-gray-500">Inventory adjustments will appear here once made.</p>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('No adjustment history found') }}</h3>
+                                    <p class="mt-1 text-sm text-gray-500">{{ __('Inventory adjustments will appear here once made.') }}</p>
                                 </div>
                             </td>
                         </tr>

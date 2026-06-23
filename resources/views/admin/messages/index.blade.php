@@ -140,7 +140,45 @@
       card.style.display = userName.includes(input) || subject.includes(input) ? '' : 'none';
     });
   }
+
+  // Real-time polling for new messages
+  document.addEventListener('DOMContentLoaded', function() {
+    var container = document.querySelector('.messages-container');
+    var lastCheck = new Date().toISOString();
+
+    function pollMessages() {
+      fetch('/api/messages/new?since=' + encodeURIComponent(lastCheck))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.messages && data.messages.length > 0) {
+            lastCheck = new Date().toISOString();
+            var emptyState = container.querySelector('.text-center.my-5');
+            if (emptyState) emptyState.remove();
+
+            data.messages.forEach(function(m) {
+              var card = document.createElement('div');
+              card.className = 'card mb-3 shadow-sm message-card animate-fade-in';
+              card.innerHTML =
+                '<div class="card-header bg-light d-flex justify-content-between align-items-center">' +
+                  '<div><strong>' + m.user + '</strong><br><small class="text-muted">' + m.time_ago + '</small></div>' +
+                  '<span class="badge bg-info">New</span>' +
+                '</div>' +
+                '<div class="card-body"><p class="message-text">' + m.message + '</p></div>';
+              container.insertBefore(card, container.firstChild);
+            });
+          }
+        })
+        .catch(function() {});
+    }
+
+    setInterval(pollMessages, 5000);
+  });
 </script>
+
+<style>
+  @keyframes fadeInMsg { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+  .animate-fade-in { animation: fadeInMsg 0.3s ease-out; }
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @endsection

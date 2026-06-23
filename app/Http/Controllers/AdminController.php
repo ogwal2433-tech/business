@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventory;
-use App\Models\Product;
 use App\Models\Sale;
+use App\Models\AdminExpense;
+use App\Models\Expense;
 use App\Models\User;
-use Carbon\Carbon;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\Auth;
-
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -18,244 +17,164 @@ class AdminController extends Controller
     {
         return view('chat.tot');
     }
-    // public function dashboard()
-    // {
 
-    //     $totalSalesToday = Sale::whereDate('created_at', today())->sum('total_amount');
-    //     $totalSalesByEmployee = Sale::where('user_id', auth()->id())->sum('total_amount');
-    //     $lowStockProducts = Product::where('quantity', '<', 5)->get(); // Low stock products
-
-    //     return view('admin.Dashboard', compact('totalSalesToday', 'totalSalesByEmployee', 'lowStockProducts'));
-    // }
-   public function dashboard()
+public function dashboard()
 {
     $user = auth()->user();
 
-    // Sales Today (by employees only)
-    $totalSalesToday = Sale::join('users', 'sales.employee_id', '=', 'users.id')
-        ->where('users.role', 'employee')
-        ->whereDate('sales.created_at', today())
-        ->sum('sales.total_amount');
-
-    // Monthly Sales (by employees only)
-    $totalMonthlySales = Sale::join('users', 'sales.employee_id', '=', 'users.id')
-        ->where('users.role', 'employee')
-        ->whereYear('sales.created_at', now()->year)
-        ->whereMonth('sales.created_at', now()->month)
-        ->sum('sales.total_amount');
-
-    // Initialize variables
+    $totalSalesToday = 0;
+    $totalMonthlySales = 0;
     $totalSalesByEmployee = 0;
     $totalEmployees = 0;
+    $dailyAdminSales = [];
+    $dailyEmployeeSales = [];
 
     if ($user->isAdmin()) {
-        // Count employees under this admin
-        $totalEmployees = $user->employees()->count();
+        $adminId = $user->id;
+
+        $totalSalesToday = Sale::where('admin_id', $adminId)
+            ->whereDate('created_at', today())
+            ->sum('total_amount');
+
+        $todayAdminSales = Sale::where('admin_id', $adminId)->whereNull('employee_id')
+            ->whereDate('created_at', today())->sum('total_amount');
+        $todayEmployeeSales = $totalSalesToday - $todayAdminSales;
+
+        $totalMonthlySales = Sale::where('admin_id', $adminId)
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->sum('total_amount');
+
+        $monthAdminSales = Sale::where('admin_id', $adminId)->whereNull('employee_id')
+            ->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->sum('total_amount');
+        $monthEmployeeSales = $totalMonthlySales - $monthAdminSales;
+
+        $totalEmployees = User::where('admin_id', $adminId)
+            ->where('role', 'employee')->count();
     } else {
-        // Total sales by this employee
+        $totalSalesToday = $user->sales()
+            ->whereDate('created_at', today())
+            ->sum('total_amount');
+
+        $totalMonthlySales = $user->sales()
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->sum('total_amount');
+
         $totalSalesByEmployee = $user->sales()->sum('total_amount');
+        $todayAdminSales = 0;
+        $todayEmployeeSales = 0;
+        $monthAdminSales = 0;
+        $monthEmployeeSales = 0;
     }
 
-    // Low stock products (for both admin and employee views)
-    $lowStockProducts = Inventory::where('quantity', '<', 5)->get();
+    $lowStockProducts = Inventory::where('quantity', '<', 5)
+        ->when($user->isAdmin(), function ($query) use ($user) {
+            $query->where('admin_id', $user->id);
+        })
+        ->get();
+
+    // --- Chart data ---
+    $dailySales = [];
+    $dailyAdminSales = [];
+    $dailyEmployeeSales = [];
+
+    if ($user->isAdmin()) {
+        $adminId = $user->id;
+
+        // Daily sales for last 30 days
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+
+            $adminDay = Sale::where('admin_id', $adminId)->whereNull('employee_id')
+                ->whereDate('created_at', $date)->sum('total_amount');
+            $empDay = Sale::where('admin_id', $adminId)->whereNotNull('employee_id')
+                ->whereDate('created_at', $date)->sum('total_amount');
+
+            $label = $date->format('M d');
+            $dailySales[] = ['date' => $label, 'total' => (float) ($adminDay + $empDay)];
+            $dailyAdminSales[] = ['date' => $label, 'total' => (float) $adminDay];
+            $dailyEmployeeSales[] = ['date' => $label, 'total' => (float) $empDay];
+        }
+
+        // Expense breakdown by category
+        $expenseCategories = Expense::whereHas('employee', function ($q) use ($adminId) {
+                $q->where('admin_id', $adminId);
+            })
+            ->selectRaw('category, SUM(amount) as total')
+            ->groupBy('category')
+            ->pluck('total', 'category')
+            ->toArray();
+
+        $adminExpenseCategories = AdminExpense::where('admin_id', $adminId)
+            ->selectRaw('category, SUM(amount) as total')
+            ->groupBy('category')
+            ->pluck('total', 'category')
+            ->toArray();
+
+        foreach ($adminExpenseCategories as $cat => $total) {
+            $expenseCategories[$cat] = ($expenseCategories[$cat] ?? 0) + $total;
+        }
+
+        // Total expenses this month
+        $monthEmployeeExpenses = Expense::whereHas('employee', fn($q) => $q->where('admin_id', $adminId))
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->sum('amount');
+
+        $monthAdminExpenses = AdminExpense::where('admin_id', $adminId)
+            ->whereYear('date', now()->year)
+            ->whereMonth('date', now()->month)
+            ->sum('amount');
+
+        $totalMonthlyExpenses = $monthEmployeeExpenses + $monthAdminExpenses;
+    } else {
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $daySales = $user->sales()->whereDate('created_at', $date)->sum('total_amount');
+            $label = $date->format('M d');
+            $dailySales[] = ['date' => $label, 'total' => (float) $daySales];
+        }
+        $expenseCategories = [];
+        $totalMonthlyExpenses = 0;
+        $monthAdminExpenses = 0;
+        $monthEmployeeExpenses = 0;
+    }
+
+    $netProfit = $totalMonthlySales - $totalMonthlyExpenses;
 
     return view('admin.Dashboard', compact(
-        'totalSalesToday',
-        'totalMonthlySales',
+        'totalSalesToday', 'todayAdminSales', 'todayEmployeeSales',
+        'totalMonthlySales', 'monthAdminSales', 'monthEmployeeSales',
         'totalSalesByEmployee',
         'totalEmployees',
-        'lowStockProducts'
+        'lowStockProducts',
+        'dailySales',
+        'dailyAdminSales',
+        'dailyEmployeeSales',
+        'expenseCategories',
+        'totalMonthlyExpenses',
+        'monthAdminExpenses',
+        'monthEmployeeExpenses',
+        'netProfit'
     ));
 }
 
-
-
-    // View and manage products
-    public function products()
-    {
-        $products = Inventory::all(); // Retrieve all products
-        return view('admin.products.index', compact('products'));
-    }
-
-    // Show the form to add/edit a product
-    public function showProductForm($id = null)
-    {
-        $product = $id ? Inventory::find($id) : null;
-        return view('admin.products.form', compact('product'));
-    }
-
-    // Store a new or update an existing product
-    public function storeProduct(Request $request, $id = null)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:1024',
-        ]);
-
-        $product = $id ? Inventory::find($id) : new Product();
-        $product->name = $request->input('name');
-        $product->price = $request->input('price');
-        $product->quantity = $request->input('quantity');
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('product_images', 'public');
-            $product->image_path = $imagePath;
-        }
-
-        $product->save();
-
-        return redirect()->route('admin.products.index')->with('success', 'Product saved successfully');
-    }
-
-    // Delete a product
-    public function deleteProduct($id)
-    {
-        $product = Inventory::findOrFail($id);
-        $product->delete();
-        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
-    }
-
-    // View sales reports
     public function salesReport()
     {
-        $sales = Sale::with('user')->latest()->get()->auth(); // Get all sales, with the employee who made them
+        $sales = Sale::with('user')->latest()->get();
         return view('Admin.admin.sales.report', compact('sales'));
     }
 
-    // Manage employees
-    public function employees()
-    {
-        $employees = User::where('role', 'employee')->get();
-        return view('admin.employees.index', compact('employees'));
-    }
-
-    // Toggle employee status (active/inactive)
     public function toggleStatus($id)
     {
         $user = User::findOrFail($id);
         $user->status = ($user->status == 'active') ? 'inactive' : 'active';
         $user->save();
 
-        return redirect()->route('admin.employees')->with('success', 'Employee status updated');
+        return redirect()->route('admin.employees.index')->with('success', __('Employee status updated'));
     }
 
-    // Dismiss an employee
-    public function dismissEmployee($id)
-    {
-        $user = User::findOrFail($id);
-        $user->status = 'inactive';
-        $user->save();
-
-        return redirect()->route('admin.employees')->with('success', 'Employee dismissed');
-    }
-
-    // Reinstate an employee
-    public function reinstateEmployee($id)
-    {
-        $user = User::findOrFail($id);
-        $user->status = 'active';
-        $user->save();
-
-        return redirect()->route('admin.employees')->with('success', 'Employee reinstated');
-    }
-
-    // Show the form to create a new employee
-    public function showEmployeeForm($id = null)
-    {
-        $employee = $id ? User::find($id) : null;
-        return view('admin.employees.form', compact('employee'));
-    }
-
-    // Store or update an employee's details
-    public function storeEmployee(Request $request, $id = null)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . ($id ? $id : ''),
-            'email' => 'nullable|email',
-            'password' => 'nullable|string|min:6',
-            'role' => 'required|in:admin,employee',
-        ]);
-
-        $employee = $id ? User::find($id) : new User();
-        $employee->name = $request->input('name');
-        $employee->username = $request->input('username');
-        $employee->email = $request->input('email');
-        $employee->role = 'employee';
-
-        if ($request->filled('password')) {
-            $employee->password = bcrypt($request->input('password'));
-        }
-
-        $employee->save();
-
-        return redirect()->route('admin.employees')->with('success', 'Employee saved successfully');
-    }
-     public function create()
-    {
-        return view('admin.employees');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'employee',
-            'status' => true,
-        ]);
-
-        return redirect()->route('admin.employees.index')->with('success', 'Employee added successfully.');
-    }
-
-    public function edit($id)
-    {
-        $employee = User::where('role', 'employee')->findOrFail($id);
-        return view('admin.employees.edit', compact('employee'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $employee = User::where('role', 'employee')->findOrFail($id);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$employee->id,
-        ]);
-
-        $employee->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
-
-        return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $employee = User::where('role', 'employee')->findOrFail($id);
-        $employee->delete();
-
-        return redirect()->route('admin.employees.index')->with('success', 'Employee deleted.');
-    }
-
-    public function toggleStatu($id)
-    {
-        $employee = User::where('role', 'employee')->findOrFail($id);
-        $employee->status = !$employee->status;
-        $employee->save();
-
-        return redirect()->route('admin.employees.index')->with('success', 'Employee status updated.');
-    }
 public function showPurchaseForm()
 {
     return view('admin.stocks.purchase');
@@ -282,40 +201,7 @@ public function storePurchase(Request $request)
         ]);
     }
 
-    return redirect()->back()->with('success', 'Stock purchases recorded successfully.');
-}
-
-public function myPurchases()
-{
-    $user = auth()->user();
-
-    $rawPurchases = Purchase::where('user_id', $user->id)
-        ->orderByDesc('purchase_date')
-        ->get();
-
-    $grouped = $rawPurchases->groupBy(function ($p) {
-        // ✅ FIX: Convert string to Carbon before formatting
-        return Carbon::parse($p->purchase_date)->format('Y-m-d');
-    })->map(function ($group) {
-        return $group->map(function ($p) {
-            return [
-                'product_name' => $p->product_name,
-                'quantity' => (int) $p->quantity,
-                'price_per_unit' => (float) $p->price_per_unit,
-                'notes' => $p->notes,
-                'purchase_date' => $p->purchase_date, // leave as string or format if needed
-            ];
-        });
-    });
-
-    $overallTotal = $grouped->flatten(1)->sum(function ($p) {
-        return $p['quantity'] * $p['price_per_unit'];
-    });
-
-    return response()->json([
-        'purchases' => $grouped,
-        'overallTotal' => number_format($overallTotal, 2),
-    ]);
+    return redirect()->back()->with('success', __('Stock purchases recorded successfully.'));
 }
 
 public function index()
@@ -337,7 +223,49 @@ public function index()
 
     return view('Admin.stocks.index', compact('purchases', 'groupedPurchases', 'overallTotal'));
 }
+public function cost(Request $request)
+{
+    // Validate input
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'amount' => 'required|numeric|min:0',
+        'category' => 'required|string|max:100',
+        'date' => 'required|date',
+        'description' => 'nullable|string|max:1000',
+    ]);
 
+    $adminId = Auth::id();
 
+    // Create AdminExpense
+    AdminExpense::create([
+        ...$validated,
+        'admin_id' => $adminId,
+    ]);
 
+    return redirect()->back()
+                     ->with('success', __('Expense recorded successfully.'));
+}
+ public function indexs()
+    {
+        $admin = Auth::user();
+
+        if (!$admin->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Employee expenses under this admin
+        $expenses = Expense::with('employee')
+            ->whereHas('employee', function ($query) use ($admin) {
+                $query->where('admin_id', $admin->id);
+            })
+            ->latest()
+            ->paginate(10);
+
+        // Admin's own expenses
+        $adminExpenses = AdminExpense::where('admin_id', $admin->id)
+            ->orderBy('date', 'desc')
+            ->paginate(10, ['*'], 'admin_page');
+
+        return view('expenses.index', compact('expenses', 'adminExpenses'));
+    }
 }

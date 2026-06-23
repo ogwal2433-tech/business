@@ -11,7 +11,7 @@
                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span class="text-sm text-blue-700 font-medium">Real-time inventory management</span>
+                    <span class="text-sm text-blue-700 font-medium">{{ __('Real-time inventory management') }}</span>
                 </div>
             </div>
         </div>
@@ -70,20 +70,78 @@
                                         class="w-full border-2 border-blue-200 rounded-xl px-6 py-4 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white hover:border-blue-300">
                                     <option value="">-- Choose a Product --</option>
                                     @foreach($products as $product)
-                                        <option value="{{ $product->id }}" data-current-quantity="{{ $product->quantity }}">
-                                            {{ $product->name }} ({{ $product->sku }}) - Current Stock: {{ $product->quantity }}
+                                        @php
+                                            $qtyDisplay = $product->quantity;
+                                            if ($product->original_quantity && $product->unit !== 'piece') {
+                                                $qtyDisplay .= ' (' . number_format($product->original_quantity) . ' ' . $product->unit . ($product->original_quantity > 1 ? 's' : '') . ')';
+                                            }
+                                        @endphp
+                                        <option value="{{ $product->id }}"
+                                            data-current-quantity="{{ $product->quantity }}"
+                                            data-unit="{{ $product->unit }}"
+                                            data-sku="{{ $product->sku }}"
+                                            data-name="{{ $product->name }}"
+                                            data-buy-price="{{ $product->purchase_price }}"
+                                            data-sell-price="{{ $product->price }}"
+                                            data-bulk-buy="{{ $product->purchase_price_bulk ?? 0 }}"
+                                            data-bulk-sell="{{ $product->selling_price_bulk ?? 0 }}"
+                                            data-original-qty="{{ $product->original_quantity ?? 0 }}">
+                                            {{ $product->name }} ({{ $product->sku }}) - {{ $qtyDisplay }} pcs
                                         </option>
                                     @endforeach
                                 </select>
-                                <div id="currentStockInfo" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                                    <div class="flex items-center gap-3 text-blue-800">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <div>
-                                            <span class="font-semibold">Current Stock Level:</span>
-                                            <span id="currentQuantity" class="ml-2 text-xl font-bold">0</span>
-                                            <span class="ml-1 text-blue-600">units</span>
+                                <div id="currentStockInfo" class="hidden transform transition-all duration-300 ease-in-out">
+                                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl overflow-hidden">
+                                        <div class="p-5 space-y-4">
+                                            <div class="flex items-start justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="p-2.5 bg-blue-100 rounded-xl">
+                                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm text-blue-600 font-medium" id="stockProductName">Selected Product</p>
+                                                        <div class="flex items-baseline gap-1.5">
+                                                            <span id="currentQuantity" class="text-3xl font-bold text-gray-900">0</span>
+                                                            <span id="currentUnit" class="text-blue-600 text-sm font-medium">pieces</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="stockQualityBadge" class="hidden">
+                                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm">
+                                                        <span class="w-1.5 h-1.5 rounded-full mr-1.5" id="qualityDot"></span>
+                                                        <span id="qualityText"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="relative">
+                                                <div class="overflow-hidden h-2 bg-gray-200 rounded-full">
+                                                    <div id="stockBar" class="h-2 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                                                </div>
+                                            </div>
+                                            <div id="productDetailRow" class="hidden grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                                                <div class="text-center p-2 bg-white/60 rounded-lg border border-blue-100">
+                                                    <div class="text-xs text-gray-500">SKU</div>
+                                                    <div id="detailSku" class="text-sm font-semibold text-gray-800 font-mono">-</div>
+                                                </div>
+                                                <div class="text-center p-2 bg-white/60 rounded-lg border border-blue-100">
+                                                    <div class="text-xs text-gray-500">Buy/Unit</div>
+                                                    <div id="detailBuy" class="text-sm font-semibold text-gray-800">-</div>
+                                                </div>
+                                                <div class="text-center p-2 bg-white/60 rounded-lg border border-blue-100">
+                                                    <div class="text-xs text-gray-500">Sell/Unit</div>
+                                                    <div id="detailSell" class="text-sm font-semibold text-gray-800">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="px-5 py-2.5 bg-blue-100/50 border-t border-blue-100">
+                                            <div class="flex items-center gap-2 text-xs text-blue-600">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span>All stock in <strong>pieces</strong> regardless of unit type</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -99,32 +157,32 @@
                                     </div>
                                     Adjustment Type
                                 </label>
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div class="relative">
                                         <input type="radio" name="type" id="increase" value="increase" class="hidden peer" required>
-                                        <label for="increase" class="flex items-center p-6 border-2 border-blue-200 rounded-2xl cursor-pointer peer-checked:border-green-500 peer-checked:bg-green-50 transition-all hover:border-blue-300 hover:bg-blue-50">
-                                            <div class="p-3 bg-green-100 rounded-xl mr-4">
-                                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <label for="increase" class="flex items-center p-4 border-2 border-blue-200 rounded-xl cursor-pointer peer-checked:border-green-500 peer-checked:bg-green-50 transition-all hover:border-blue-300 hover:bg-blue-50">
+                                            <div class="p-2 bg-green-100 rounded-lg mr-3">
+                                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                                 </svg>
                                             </div>
                                             <div>
-                                                <span class="block text-lg font-semibold text-gray-900">Increase Stock</span>
-                                                <span class="text-sm text-gray-600">Add items to inventory</span>
+                                                <span class="block text-base font-semibold text-gray-900">Increase Stock</span>
+                                                <span class="text-xs text-gray-600">Add items to inventory</span>
                                             </div>
                                         </label>
                                     </div>
                                     <div class="relative">
                                         <input type="radio" name="type" id="decrease" value="decrease" class="hidden peer">
-                                        <label for="decrease" class="flex items-center p-6 border-2 border-blue-200 rounded-2xl cursor-pointer peer-checked:border-red-500 peer-checked:bg-red-50 transition-all hover:border-blue-300 hover:bg-blue-50">
-                                            <div class="p-3 bg-red-100 rounded-xl mr-4">
-                                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <label for="decrease" class="flex items-center p-4 border-2 border-blue-200 rounded-xl cursor-pointer peer-checked:border-red-500 peer-checked:bg-red-50 transition-all hover:border-blue-300 hover:bg-blue-50">
+                                            <div class="p-2 bg-red-100 rounded-lg mr-3">
+                                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                                 </svg>
                                             </div>
                                             <div>
-                                                <span class="block text-lg font-semibold text-gray-900">Decrease Stock</span>
-                                                <span class="text-sm text-gray-600">Remove items from inventory</span>
+                                                <span class="block text-base font-semibold text-gray-900">Decrease Stock</span>
+                                                <span class="text-xs text-gray-600">Remove items from inventory</span>
                                             </div>
                                         </label>
                                     </div>
@@ -149,9 +207,9 @@
                                            required
                                            class="w-full border-2 border-blue-200 rounded-xl px-6 py-4 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors hover:border-blue-300"
                                            placeholder="Enter quantity">
-                                    <span class="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold text-lg">units</span>
+                                    <span class="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold text-lg" id="quantityUnitLabel">pieces</span>
                                 </div>
-                                <div id="newStockInfo" class="hidden p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                                <div id="newStockInfo" class="hidden p-4 bg-gray-50 border border-gray-200 rounded-xl transition-all duration-300 ease-in-out">
                                     <div class="flex items-center justify-between">
                                         <span class="text-gray-700 font-medium">New stock level will be:</span>
                                         <strong id="newQuantity" class="text-2xl font-bold text-gray-900">0</strong>
@@ -187,8 +245,8 @@
                             <!-- Submit Button -->
                             <div class="pt-6">
                                 <button type="submit"
-                                        class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-lg py-5 px-8 rounded-2xl hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-3">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="inline-flex bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-sm items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
                                     Apply Stock Adjustment
@@ -200,101 +258,126 @@
 
                 <!-- Guidelines & Info Section -->
                 <div class="space-y-6">
-                    <!-- Quick Stats -->
-                    <div class="bg-white rounded-2xl shadow-lg border border-blue-100 p-6">
-                        <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-3">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                            Inventory Summary
-                        </h3>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                <span class="text-blue-700 font-medium">Total Products</span>
-                                <span class="text-xl font-bold text-blue-900">{{ $products->count() }}</span>
+                    <!-- Stock Health Overview -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-4">
+                            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Stock Health Overview
+                            </h3>
+                        </div>
+                        @php
+                            $total = $products->count();
+                            $inStock = $products->where('quantity', '>', 10)->count();
+                            $lowStock = $products->where('quantity', '<=', 10)->where('quantity', '>', 0)->count();
+                            $outOfStock = $products->where('quantity', 0)->count();
+                            $healthScore = $total > 0 ? round(($inStock / $total) * 100) : 0;
+                        @endphp
+                        <div class="p-5 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-600">Overall Health</span>
+                                <span class="text-lg font-bold {{ $healthScore >= 70 ? 'text-green-600' : ($healthScore >= 40 ? 'text-yellow-600' : 'text-red-600') }}">
+                                    {{ $healthScore }}%
+                                </span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                                <span class="text-green-700 font-medium">In Stock Items</span>
-                                <span class="text-xl font-bold text-green-900">{{ $products->where('quantity', '>', 0)->count() }}</span>
+                            <div class="overflow-hidden h-2.5 bg-gray-100 rounded-full">
+                                <div class="h-2.5 rounded-full transition-all duration-700 ease-out {{ $healthScore >= 70 ? 'bg-green-500' : ($healthScore >= 40 ? 'bg-yellow-500' : 'bg-red-500') }}" style="width: {{ $healthScore }}%"></div>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                                <span class="text-red-700 font-medium">Out of Stock</span>
-                                <span class="text-xl font-bold text-red-900">{{ $products->where('quantity', 0)->count() }}</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                                <div class="text-center p-2.5 bg-green-50 rounded-xl border border-green-100">
+                                    <div class="text-xl font-bold text-green-700">{{ $inStock }}</div>
+                                    <div class="text-xs text-green-600 font-medium mt-0.5">Healthy</div>
+                                </div>
+                                <div class="text-center p-2.5 bg-yellow-50 rounded-xl border border-yellow-100">
+                                    <div class="text-xl font-bold text-yellow-700">{{ $lowStock }}</div>
+                                    <div class="text-xs text-yellow-600 font-medium mt-0.5">Low</div>
+                                </div>
+                                <div class="text-center p-2.5 bg-red-50 rounded-xl border border-red-100">
+                                    <div class="text-xl font-bold text-red-700">{{ $outOfStock }}</div>
+                                    <div class="text-xs text-red-600 font-medium mt-0.5">Out</div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Guidelines -->
-                    <div class="bg-white rounded-2xl shadow-lg border border-blue-100 p-6">
-                        <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-3">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                            </svg>
-                            Adjustment Guidelines
-                        </h3>
-                        <div class="space-y-4 text-sm">
-                            <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                                <div class="p-1 bg-blue-100 rounded mt-0.5">
-                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    <!-- Adjustment Guidelines -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-4">
+                            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                Adjustment Guidelines
+                            </h3>
+                        </div>
+                        <div class="p-5 space-y-3 text-sm">
+                            <div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                                <div class="p-1.5 bg-green-100 rounded-lg mt-0.5">
+                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <strong class="text-blue-900">Increase Stock For:</strong>
-                                    <p class="text-blue-700 mt-1">New shipments, customer returns, found items, production batches</p>
+                                    <strong class="text-green-900">Increase Stock</strong>
+                                    <p class="text-green-700 mt-0.5">New shipments, returns, found items, production batches</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
-                                <div class="p-1 bg-red-100 rounded mt-0.5">
+                            <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
+                                <div class="p-1.5 bg-red-100 rounded-lg mt-0.5">
                                     <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <strong class="text-red-900">Decrease Stock For:</strong>
-                                    <p class="text-red-700 mt-1">Damaged goods, theft, expiration, quality control rejects</p>
+                                    <strong class="text-red-900">Decrease Stock</strong>
+                                    <p class="text-red-700 mt-0.5">Damaged goods, theft, expiration, quality rejects</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
-                                <div class="p-1 bg-purple-100 rounded mt-0.5">
+                            <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
+                                <div class="p-1.5 bg-purple-100 rounded-lg mt-0.5">
                                     <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <strong class="text-purple-900">Security Note:</strong>
-                                    <p class="text-purple-700 mt-1">All adjustments are logged and require manager approval for audit purposes</p>
+                                    <strong class="text-purple-900">Audit Trail</strong>
+                                    <p class="text-purple-700 mt-0.5">Every adjustment is logged with user, timestamp, and reason</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Recent Activity -->
-                    <div class="bg-white rounded-2xl shadow-lg border border-blue-100 p-6">
-                        <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-3">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Best Practices
-                        </h3>
-                        <ul class="space-y-3 text-sm text-gray-600">
-                            <li class="flex items-start gap-2">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                <span>Always verify physical stock before adjustment</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                <span>Include detailed reasons for audit compliance</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                <span>Double-check quantities before submission</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                <span>Notify relevant teams of significant changes</span>
-                            </li>
-                        </ul>
+                    <!-- Quick Links -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5">
+                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Quick Actions</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <a href="{{ route('inventory.history') }}" class="flex items-center gap-2 p-3 bg-gray-50 hover:bg-blue-50 rounded-xl transition-colors duration-200 text-sm font-medium text-gray-700 hover:text-blue-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                History
+                            </a>
+                            <a href="{{ route('inventory.upload.form') }}" class="flex items-center gap-2 p-3 bg-gray-50 hover:bg-blue-50 rounded-xl transition-colors duration-200 text-sm font-medium text-gray-700 hover:text-blue-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                                </svg>
+                                Upload
+                            </a>
+                            <a href="{{ route('inventory.list') }}" class="flex items-center gap-2 p-3 bg-gray-50 hover:bg-blue-50 rounded-xl transition-colors duration-200 text-sm font-medium text-gray-700 hover:text-blue-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                List
+                            </a>
+                            <a href="{{ route('inventory.index') }}" class="flex items-center gap-2 p-3 bg-gray-50 hover:bg-blue-50 rounded-xl transition-colors duration-200 text-sm font-medium text-gray-700 hover:text-blue-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Report
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -312,14 +395,70 @@ document.addEventListener('DOMContentLoaded', function() {
     const newQuantitySpan = document.getElementById('newQuantity');
     const typeRadios = document.querySelectorAll('input[name="type"]');
 
+    const currentUnitSpan = document.getElementById('currentUnit');
+    const stockQualityBadge = document.getElementById('stockQualityBadge');
+    const qualityDot = document.getElementById('qualityDot');
+    const qualityText = document.getElementById('qualityText');
+    const stockBar = document.getElementById('stockBar');
+    const stockProductName = document.getElementById('stockProductName');
+    const productDetailRow = document.getElementById('productDetailRow');
+    const detailSku = document.getElementById('detailSku');
+    const detailBuy = document.getElementById('detailBuy');
+    const detailSell = document.getElementById('detailSell');
+
+    function updateStockQuality(qty) {
+        if (qty === 0) {
+            stockQualityBadge.classList.remove('hidden');
+            qualityDot.className = 'w-1.5 h-1.5 rounded-full mr-1.5 bg-red-500';
+            qualityText.textContent = 'Out of Stock';
+            qualityText.className = 'text-red-700';
+            stockQualityBadge.querySelector('span').className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm bg-red-50 border-red-200';
+            stockBar.className = 'h-2 rounded-full transition-all duration-500 ease-out bg-red-500';
+            stockBar.style.width = '0%';
+        } else if (qty <= 10) {
+            stockQualityBadge.classList.remove('hidden');
+            qualityDot.className = 'w-1.5 h-1.5 rounded-full mr-1.5 bg-yellow-500';
+            qualityText.textContent = 'Low Stock';
+            qualityText.className = 'text-yellow-700';
+            stockQualityBadge.querySelector('span').className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm bg-yellow-50 border-yellow-200';
+            stockBar.className = 'h-2 rounded-full transition-all duration-500 ease-out bg-yellow-500';
+            stockBar.style.width = Math.min((qty / 50) * 100, 30) + '%';
+        } else {
+            stockQualityBadge.classList.remove('hidden');
+            qualityDot.className = 'w-1.5 h-1.5 rounded-full mr-1.5 bg-green-500';
+            qualityText.textContent = 'In Stock';
+            qualityText.className = 'text-green-700';
+            stockQualityBadge.querySelector('span').className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm bg-green-50 border-green-200';
+            stockBar.className = 'h-2 rounded-full transition-all duration-500 ease-out bg-green-500';
+            stockBar.style.width = Math.min((qty / 100) * 100, 100) + '%';
+        }
+    }
+
     // Show current stock when product is selected
     productSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const currentQuantity = selectedOption.getAttribute('data-current-quantity');
+        const unit = selectedOption.getAttribute('data-unit') || 'piece';
+        const name = selectedOption.getAttribute('data-name');
+        const sku = selectedOption.getAttribute('data-sku');
+        const buyPrice = selectedOption.getAttribute('data-buy-price');
+        const sellPrice = selectedOption.getAttribute('data-sell-price');
 
         if (currentQuantity !== null) {
-            currentQuantitySpan.textContent = currentQuantity;
+            const qty = parseInt(currentQuantity);
+            currentQuantitySpan.textContent = qty.toLocaleString();
+            currentUnitSpan.textContent = unit === 'piece' ? 'pieces' : unit + 's';
+            stockProductName.textContent = name || 'Selected Product';
+
+            if (sku) {
+                detailSku.textContent = sku;
+                detailBuy.textContent = 'UGx ' + parseFloat(buyPrice).toLocaleString();
+                detailSell.textContent = 'UGx ' + parseFloat(sellPrice).toLocaleString();
+                productDetailRow.classList.remove('hidden');
+            }
+
             currentStockInfo.classList.remove('hidden');
+            updateStockQuality(qty);
             calculateNewStock();
         } else {
             currentStockInfo.classList.add('hidden');
@@ -338,18 +477,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentQuantity = parseInt(selectedOption.getAttribute('data-current-quantity')) || 0;
         const adjustmentQuantity = parseInt(quantityInput.value) || 0;
         const selectedType = document.querySelector('input[name="type"]:checked')?.value;
+        const unit = selectedOption.getAttribute('data-unit') || 'piece';
+        const unitLabel = unit === 'piece' ? 'pieces' : unit + 's';
 
-        if (currentQuantity > 0 && adjustmentQuantity > 0 && selectedType) {
+        document.getElementById('quantityUnitLabel').textContent = unitLabel;
+
+        if (adjustmentQuantity > 0 && selectedType) {
             let newQuantity;
             if (selectedType === 'increase') {
                 newQuantity = currentQuantity + adjustmentQuantity;
                 newQuantitySpan.className = 'text-2xl font-bold text-green-600';
             } else {
                 newQuantity = currentQuantity - adjustmentQuantity;
-                newQuantitySpan.className = newQuantity < 0 ? 'text-2xl font-bold text-red-600' : 'text-2xl font-bold text-orange-600';
+                if (newQuantity < 0) {
+                    newQuantitySpan.className = 'text-2xl font-bold text-red-600';
+                } else {
+                    newQuantitySpan.className = 'text-2xl font-bold text-orange-600';
+                }
             }
 
-            newQuantitySpan.textContent = newQuantity;
+            newQuantitySpan.textContent = newQuantity + ' ' + unitLabel;
             newStockInfo.classList.remove('hidden');
         } else {
             newStockInfo.classList.add('hidden');

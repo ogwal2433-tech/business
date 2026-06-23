@@ -1,0 +1,5 @@
+C:\Users\Richie\Business\desktop\7za-wrapper\publish\7zawrapper.exe
+C:\Users\Richie\Business\desktop\7za-wrapper\publish\7zawrapper.dll
+C:\Users\Richie\Business\desktop\7za-wrapper\publish\7zawrapper.deps.json
+C:\Users\Richie\Business\desktop\7za-wrapper\publish\7zawrapper.runtimeconfig.json
+C:\Users\Richie\Business\desktop\7za-wrapper\publish\7zawrapper.pdb

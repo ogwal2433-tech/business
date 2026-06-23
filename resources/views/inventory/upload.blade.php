@@ -1,336 +1,325 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-0">
-    <!-- Header Section -->
-   <!-- CSRF Token meta (put this in your <head>) -->
-<meta name="csrf-token" content="{{ csrf_token() }}">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-4 sm:py-6">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<div class="w-full bg-white shadow-md border-b border-blue-100 mb-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2">
-      <!-- Left side: Title + subtitle -->
-      <div class="w-full lg:w-auto">
-        {{-- <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-          <!-- UPLOAD ICON swapped in here -->
-          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
-          Upload Inventory
-        </h1> --}}
-        <p class="text-base sm:text-lg text-gray-600 max-w-md">Add multiple products to your inventory in one go</p>
-      </div>
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
 
-      <!-- Right side: badges, download, and upload form -->
-      <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-        <div class="flex items-center gap-2 bg-blue-50 px-4 py-3 rounded-xl border border-blue-200 whitespace-nowrap">
+        <!-- Header Actions -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
+            <a href="{{ route('inventory.download.template') }}"
+               class="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                <span>{{ __('Download Template') }}</span>
+            </a>
 
+            <form action="{{ route('inventory.bulk.upload') }}"
+                  method="POST"
+                  enctype="multipart/form-data"
+                  class="flex flex-col sm:flex-row gap-2 flex-1">
+                @csrf
+                <input
+                    type="file"
+                    name="inventory_file"
+                    accept=".csv"
+                    required
+                    class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    aria-label="{{ __('Select inventory file to upload') }}"
+                />
+                <button
+                    type="submit"
+                    class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl transition font-semibold text-sm shadow-sm hover:shadow-md flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                    </svg>
+                    <span>{{ __('Upload CSV') }}</span>
+                </button>
+            </form>
+        </div>
 
-        <a href="{{ route('inventory.download.template') }}"
-           class="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] font-medium whitespace-nowrap">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
-          Download Template
-        </a>
+        @if(session('message'))
+            <p class="text-sm text-gray-600 mb-4">{{ session('message') }}</p>
+        @endif
+        <p id="uploadStatus" class="text-sm text-gray-600 hidden mb-4"></p>
 
-        <!-- Upload Form -->
-    <!-- Make sure CSRF token is included -->
-<form action="{{ route('inventory.bulk.upload') }}"
-      method="POST"
-      enctype="multipart/form-data"
-      class="flex items-center gap-2 w-full sm:w-auto max-w-xs sm:max-w-none">
-
-    @csrf
-
-    <input
-        type="file"
-        name="inventory_file"
-        accept=".csv"
-        required
-        class="border border-gray-300 rounded px-3 py-2 w-full sm:w-auto text-sm sm:text-base"
-        aria-label="Select inventory file to upload"
-    />
-
-    <button
-        type="submit"
-        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700
-               disabled:bg-blue-400 disabled:cursor-not-allowed text-white
-               px-4 py-2 rounded transition font-semibold">
-        Upload
-    </button>
-</form>
-
-<!-- Optional status message -->
-@if(session('message'))
-    <p class="mt-3 text-sm text-gray-600">{{ session('message') }}</p>
-@endif
-
-
-<!-- For status message -->
-<p id="uploadStatus" class="mt-3 text-sm text-gray-600"></p>
-
-      </div>
-    </div>
-
-    <!-- Success/Error message -->
-    <div class="mt-4">
-      <p id="message" class="hidden text-center font-semibold text-sm"></p>
-    </div>
-  </div>
-</div>
-    <!-- Main Content -->
-    <div class="w-full px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-            <!-- Success Message -->
-            @if(session('success'))
-                <div class="mb-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-xl shadow-sm">
-                    <div class="flex items-start gap-3">
-                        <svg class="w-6 h-6 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-base sm:text-lg font-semibold text-green-800 mb-1">Inventory Upload Successful!</h3>
-                            <p class="text-sm sm:text-base text-green-700 break-words">{{ session('success') }}</p>
-                        </div>
+        <!-- Success Message -->
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-xl shadow-sm">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        @if(session('inventory_upload'))
+                            <h3 class="text-sm font-semibold text-green-800 mb-1">{{ __('Inventory Upload Successful!') }}</h3>
+                        @endif
+                        <p class="text-sm text-green-700">{{ session('success') }}</p>
                     </div>
                 </div>
-            @endif
+            </div>
+        @endif
 
-            <!-- Error Messages -->
-            @if($errors->any())
-                <div class="mb-6 p-4 sm:p-6 bg-red-50 border-l-4 border-red-500 rounded-xl shadow-sm">
-                    <div class="flex items-start gap-3">
-                        <svg class="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-base sm:text-lg font-semibold text-red-800 mb-2">Please correct the following errors:</h3>
-                            <ul class="text-sm sm:text-base text-red-700 list-disc list-inside space-y-1">
-                                @foreach($errors->all() as $error)
-                                    <li class="break-words">{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+        @if(session('warning'))
+            <div class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-xl shadow-sm">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-semibold text-yellow-800 mb-1">{{ __('Notice') }}</h3>
+                        <p class="text-sm text-yellow-700">{!! session('warning') !!}</p>
                     </div>
                 </div>
-            @endif
+            </div>
+        @endif
 
-            <!-- Form Card -->
-            <div class="bg-white rounded-2xl shadow-xl border border-blue-100 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-8 py-5 sm:py-6">
-                    <h2 class="text-xl sm:text-2xl font-semibold text-white flex items-center gap-2 sm:gap-3">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Error Messages -->
+        @if($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl shadow-sm">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-semibold text-red-800 mb-2">{{ __('Please correct the following errors:') }}</h3>
+                        <ul class="text-sm text-red-700 list-disc list-inside space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
                         </svg>
-                        <span>Product Information</span>
+                        <span>{{ __('Product Information') }}</span>
                     </h2>
+                    <a href="{{ route('inventory.upload.logs') }}" class="text-sm text-white/80 hover:text-white underline">
+                        {{ __('View Upload Logs') }}
+                    </a>
                 </div>
+            </div>
 
-                <form method="POST" action="{{ route('inventory.upload.process') }}" class="p-4 sm:p-6 lg:p-8">
-                    @csrf
+            <form method="POST" action="{{ route('inventory.upload.process') }}" class="p-6">
+                @csrf
 
-                    <div id="products-container" class="space-y-6">
-                        <!-- Initial Product Item -->
-                        <div class="product-item border-2 border-blue-100 rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-md transition-shadow duration-200" data-index="0">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
-                                <!-- SKU with Scanner -->
-                                <div class="sm:col-span-2 lg:col-span-3">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                                        </svg>
-                                        <span>SKU *</span>
-                                    </label>
-                                    <div class="flex gap-2">
-                                        <input type="text" name="products[0][sku]" class="sku-input flex-1 min-w-0 border-2 border-blue-200 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base" required placeholder="e.g., PROD001">
-                                        <button type="button" class="scan-btn bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-colors flex items-center gap-2 flex-shrink-0 shadow-md hover:shadow-lg" title="Scan Barcode">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                                            </svg>
-                                            <span class="hidden sm:inline text-sm">Scan</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Product Name -->
-                                <div class="sm:col-span-2 lg:col-span-4">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                                        </svg>
-                                        <span>Product Name *</span>
-                                    </label>
-                                    <input type="text" name="products[0][name]" required class="w-full border-2 border-blue-200 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base" placeholder="e.g., Apple iPhone 14">
-                                </div>
-
-                                <!-- Quantity -->
-                                <div class="sm:col-span-1 lg:col-span-2">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                        </svg>
-                                        <span>Quantity *</span>
-                                    </label>
-                                    <input type="number" name="products[0][quantity]" class="quantity-input w-full border-2 border-blue-200 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base" min="1" required placeholder="0">
-                                </div>
-
-                                <!-- Unit Selection -->
-                                <div class="sm:col-span-1 lg:col-span-2">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
-                                        <span>Unit</span>
-                                    </label>
-                                    <select name="products[0][unit]" class="unit-select w-full border-2 border-blue-200 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base">
-                                        <option value="piece" selected>Piece</option>
-                                        <option value="dozen">Dozen (12)</option>
-                                        <option value="carton">Carton (24)</option>
-                                    </select>
-                                </div>
-
-                                <!-- Remove Button -->
-                                <div class="sm:col-span-2 lg:col-span-1 flex items-end justify-start lg:justify-end">
-                                    <button type="button" class="remove-product w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 sm:py-3 rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm font-medium" disabled aria-disabled="true">
+                <div id="products-container" class="space-y-5">
+                    <!-- Initial Product Item -->
+                    <div class="product-item border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow" data-index="0">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
+                            <!-- SKU with Scanner -->
+                            <div class="sm:col-span-2 lg:col-span-3">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                                    </svg>
+                                    <span>{{ __('SKU') }} *</span>
+                                </label>
+                                <div class="flex gap-1.5">
+                                    <input type="text" name="products[0][sku]" class="sku-input flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required placeholder="{{ __('e.g., PROD001') }}">
+                                    <button type="button" class="scan-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center shadow-sm hover:shadow-md flex-shrink-0" title="{{ __('Scan Barcode') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                                         </svg>
-                                        <span>Delete</span>
                                     </button>
                                 </div>
+                            </div>
 
-                                <!-- Bulk Purchase Price -->
-                                <div class="sm:col-span-1 lg:col-span-3 bulk-group hidden">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                        Bulk Purchase Price
-                                        <span class="text-xs text-gray-500 bulk-label"></span>
-                                    </label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm sm:text-base">$</span>
-                                        <input type="text" name="products[0][purchase_price_bulk]" class="bulk-purchase number-input w-full border-2 border-blue-200 rounded-xl pl-8 pr-3 sm:pr-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base" placeholder="0.00">
-                                    </div>
+                            <!-- Product Name -->
+                            <div class="sm:col-span-2 lg:col-span-4">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                    </svg>
+                                    <span>{{ __('Product Name') }} *</span>
+                                </label>
+                                <input type="text" name="products[0][name]" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="{{ __('e.g., Apple iPhone 14') }}">
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="sm:col-span-1 lg:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    <span>{{ __('Quantity') }} *</span>
+                                </label>
+                                <input type="number" name="products[0][quantity]" class="quantity-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" min="1" required placeholder="0">
+                            </div>
+
+                            <!-- Unit Selection -->
+                            <div class="sm:col-span-1 lg:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                    <span>{{ __('Unit') }}</span>
+                                </label>
+                                <select name="products[0][unit]" class="unit-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                    <option value="piece" selected>{{ __('Piece') }}</option>
+                                    <option value="dozen">{{ __('Dozen') }} (12)</option>
+                                    <option value="carton">{{ __('Carton') }} (24)</option>
+                                </select>
+                            </div>
+
+                            <!-- Remove Button -->
+                            <div class="sm:col-span-2 lg:col-span-1 flex items-end">
+                                <button type="button" class="remove-product w-9 h-9 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed" disabled aria-disabled="true" title="{{ __('Delete product') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Bulk Purchase Price -->
+                            <div class="sm:col-span-1 lg:col-span-3 bulk-group hidden">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                    {{ __('Bulk Purchase') }}
+                                    <span class="text-xs text-gray-400 bulk-label"></span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">UGx</span>
+                                    <input type="text" name="products[0][purchase_price_bulk]" class="bulk-purchase number-input w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0">
                                 </div>
+                            </div>
 
-                                <!-- Bulk Selling Price -->
-                                <div class="sm:col-span-1 lg:col-span-3 bulk-group hidden">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                        Bulk Selling Price
-                                        <span class="text-xs text-gray-500 bulk-label"></span>
-                                    </label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm sm:text-base">$</span>
-                                        <input type="text" name="products[0][selling_price_bulk]" class="bulk-sell number-input w-full border-2 border-blue-200 rounded-xl pl-8 pr-3 sm:pr-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base" placeholder="0.00">
-                                    </div>
+                            <!-- Bulk Selling Price -->
+                            <div class="sm:col-span-1 lg:col-span-3 bulk-group hidden">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                    {{ __('Bulk Selling') }}
+                                    <span class="text-xs text-gray-400 bulk-label"></span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">UGx</span>
+                                    <input type="text" name="products[0][selling_price_bulk]" class="bulk-sell number-input w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0">
                                 </div>
+                            </div>
 
-                                <!-- Per-piece Purchase -->
-                                <div class="sm:col-span-1 lg:col-span-3">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Purchase Price (per piece)</label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm sm:text-base">$</span>
-                                        <input type="text" name="products[0][purchase_price]" class="per-piece-purchase number-input w-full border-2 border-blue-200 rounded-xl pl-8 pr-3 sm:pr-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base" placeholder="0.00">
-                                    </div>
+                            <!-- Per-piece Purchase -->
+                            <div class="sm:col-span-1 lg:col-span-3">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">{{ __('Buy Price/Unit') }}</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">UGx</span>
+                                    <input type="text" name="products[0][purchase_price]" class="per-piece-purchase number-input w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </div>
+                            </div>
 
-                                <!-- Per-piece Sell -->
-                                <div class="sm:col-span-1 lg:col-span-3">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Selling Price (per piece)</label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm sm:text-base">$</span>
-                                        <input type="text" name="products[0][price]" class="per-piece-sell number-input w-full border-2 border-blue-200 rounded-xl pl-8 pr-3 sm:pr-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base" placeholder="0.00">
-                                    </div>
+                            <!-- Per-piece Sell -->
+                            <div class="sm:col-span-1 lg:col-span-3">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">{{ __('Sell Price/Unit') }}</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">UGx</span>
+                                    <input type="text" name="products[0][price]" class="per-piece-sell number-input w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0">
                                 </div>
+                            </div>
 
-                                <!-- Profit Margin Display -->
-                                <div class="sm:col-span-2 lg:col-span-12 mt-2 sm:mt-4 profit-display hidden">
-                                    <div class="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-2xl p-4 sm:p-6">
-                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                                            <div class="text-center">
-                                                <div class="text-xs sm:text-sm font-medium text-gray-700 mb-1">Profit per piece</div>
-                                                <div class="profit-amount text-lg sm:text-xl font-bold text-blue-700">$0.00</div>
-                                            </div>
-                                            <div class="text-center">
-                                                <div class="text-xs sm:text-sm font-medium text-gray-700 mb-1">Margin</div>
-                                                <div class="profit-margin text-lg sm:text-xl font-bold text-green-700">0%</div>
-                                            </div>
-                                            <div class="text-center">
-                                                <div class="text-xs sm:text-sm font-medium text-gray-700 mb-1">Total Profit</div>
-                                                <div class="total-profit text-lg sm:text-xl font-bold text-purple-700">$0.00</div>
-                                            </div>
+                            <!-- Profit Margin Display -->
+                            <div class="sm:col-span-2 lg:col-span-12 mt-2 profit-display hidden">
+                                <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-4">
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="text-center">
+                                            <div class="text-xs font-medium text-gray-500 mb-0.5">{{ __('Profit/Unit') }}</div>
+                                            <div class="profit-amount text-lg font-bold text-blue-700">UGx 0</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-xs font-medium text-gray-500 mb-0.5">{{ __('Margin') }}</div>
+                                            <div class="profit-margin text-lg font-bold text-green-700">0%</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-xs font-medium text-gray-500 mb-0.5">{{ __('Total Profit') }}</div>
+                                            <div class="total-profit text-lg font-bold text-purple-700">UGx 0</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Action Buttons -->
-                    <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
-                        <button type="button" id="add-product" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-3 font-semibold text-sm sm:text-base">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                            </svg>
-                            Add Another Product
-                        </button>
-                        <button type="submit" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-3 font-semibold text-sm sm:text-base">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                            </svg>
-                            Upload Inventory
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <!-- Action Buttons -->
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <button type="button" id="add-product" class="inline-flex bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md items-center gap-2 font-semibold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        {{ __('Add Product') }}
+                    </button>
+                    <button type="submit" class="inline-flex bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md items-center gap-2 font-semibold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                        </svg>
+                        {{ __('Upload Inventory') }}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <!-- Scanner Modal -->
-<div id="scanner-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white p-4 sm:p-8 rounded-2xl shadow-2xl relative max-w-2xl w-full mx-auto">
-        <div class="text-center mb-4 sm:mb-6">
-            <h3 class="text-xl sm:text-2xl font-semibold text-gray-900 flex items-center justify-center gap-2 sm:gap-3">
-                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div id="scanner-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white p-3 sm:p-8 rounded-lg sm:rounded-2xl shadow-2xl relative max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto">
+        <div class="text-center mb-3 sm:mb-6">
+            <h3 class="text-lg sm:text-2xl font-semibold text-gray-900 flex items-center justify-center gap-2 sm:gap-3">
+                <svg class="w-5 h-5 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                 </svg>
-                <span>Barcode Scanner</span>
+                <span>{{ __('Barcode Scanner') }}</span>
             </h3>
-            <p class="text-sm sm:text-base text-gray-600 mt-2">Position the barcode within the camera view</p>
+            <p class="text-xs sm:text-base text-gray-600 mt-1 sm:mt-2">{{ __('Position barcode in view') }}</p>
         </div>
 
         <!-- Camera Container -->
-        <div class="relative bg-gray-900 rounded-xl overflow-hidden mx-auto" style="max-width: 500px;">
-            <video id="barcode-video" class="w-full h-60 sm:h-80 object-cover" autoplay playsinline></video>
+            <div class="relative bg-gray-900 rounded-lg sm:rounded-xl overflow-hidden mx-auto" style="max-width: 100%; aspect-ratio: 16/9;">
+            <video id="barcode-video" class="w-full h-full object-contain" autoplay playsinline muted></video>
 
             <!-- Scanner Overlay -->
             <div class="absolute inset-0 flex items-center justify-center">
-                <div class="border-2 border-white border-dashed rounded-lg w-48 h-24 sm:w-64 sm:h-32 flex items-center justify-center">
-                    <div class="text-white text-xs sm:text-sm text-center">
-                        <svg class="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="border-2 border-white border-dashed rounded-lg w-40 h-20 sm:w-64 sm:h-32 flex items-center justify-center">
+                    <div class="text-white text-xs text-center">
+                        <svg class="w-5 h-5 sm:w-8 sm:h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                         </svg>
-                        Align barcode here
+                        {{ __('Align Barcode here') }}
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Scanner Controls -->
-        <div class="mt-4 sm:mt-6 text-center">
-            <p id="scanner-feedback" class="text-xs sm:text-sm min-h-6 mb-4"></p>
-            <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                <button id="close-scanner" class="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl transition-colors flex items-center justify-center gap-2 font-semibold text-sm shadow-md hover:shadow-lg">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="mt-3 sm:mt-6 text-center">
+            <p id="scanner-feedback" class="text-xs sm:text-sm min-h-6 mb-3 sm:mb-4"></p>
+            <div class="flex flex-col gap-2 sm:gap-3">
+                <button id="toggle-torch"
+                    class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 font-semibold text-sm shadow-md hover:shadow-lg w-full hidden">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                    {{ __('Torch') }}
+                </button>
+                <button id="close-scanner" class="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 font-semibold text-sm shadow-md hover:shadow-lg w-full">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                    Close Scanner
+                    {{ __('Close Scanner') }}
+                    <span class="block sm:hidden text-xs opacity-75 mt-0.5">{{ __('Tap to close') }}</span>
                 </button>
-                <button id="retry-scan" class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl transition-colors flex items-center justify-center gap-2 font-semibold text-sm hidden shadow-md hover:shadow-lg">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="retry-scan" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 font-semibold text-sm shadow-md hover:shadow-lg w-full hidden">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    Scan Again
+                    {{ __('Scan Again') }}
                 </button>
             </div>
         </div>
@@ -343,26 +332,22 @@ document.addEventListener('DOMContentLoaded', function() {
     let productCount = 1;
     const codeReader = new ZXing.BrowserMultiFormatReader();
     let currentScanner = null;
+    let torchAvailable = false;
+    let torchOn = false;
+    let currentStream = null;
+    let selectedDeviceId = null;
 
     // Add new product
     document.getElementById('add-product').addEventListener('click', function() {
         const container = document.getElementById('products-container');
         const template = document.querySelector('.product-item').cloneNode(true);
-
         template.setAttribute('data-index', productCount);
         template.querySelectorAll('input, select').forEach(input => {
             const name = input.getAttribute('name').replace('[0]', `[${productCount}]`);
             input.setAttribute('name', name);
-
-            if (input.classList.contains('sku-input')) {
-                input.value = '';
-            }
-            if (input.classList.contains('quantity-input')) {
-                input.value = '';
-            }
-            if (input.classList.contains('unit-select')) {
-                input.value = 'piece';
-            }
+            if (input.classList.contains('sku-input')) input.value = '';
+            if (input.classList.contains('quantity-input')) input.value = '';
+            if (input.classList.contains('unit-select')) input.value = 'piece';
             if (input.classList.contains('per-piece-purchase') || input.classList.contains('per-piece-sell')) {
                 input.value = '';
                 input.readOnly = false;
@@ -372,246 +357,242 @@ document.addEventListener('DOMContentLoaded', function() {
                 input.value = '';
             }
         });
-
-        // Reset bulk groups and profit display
-        template.querySelectorAll('.bulk-group').forEach(group => group.classList.add('hidden'));
+        template.querySelectorAll('.bulk-group').forEach(g => g.classList.add('hidden'));
         template.querySelector('.profit-display').classList.add('hidden');
-
-        // Enable remove button for new items
         const removeBtn = template.querySelector('.remove-product');
         removeBtn.disabled = false;
         removeBtn.setAttribute('aria-disabled', 'false');
-
         container.appendChild(template);
         productCount++;
-
-        // Re-attach event listeners to new elements
         attachEventListeners(template);
     });
 
-    // Remove product
     document.addEventListener('click', function(e) {
         if (e.target.closest('.remove-product') && !e.target.closest('.remove-product').disabled) {
-            const productItem = e.target.closest('.product-item');
-            if (document.querySelectorAll('.product-item').length > 1) {
-                productItem.remove();
-            }
+            const item = e.target.closest('.product-item');
+            if (document.querySelectorAll('.product-item').length > 1) item.remove();
         }
     });
 
-    // Unit selection change - Original logic intact
     document.addEventListener('change', function(e) {
         if (e.target.classList.contains('unit-select')) {
-            const productItem = e.target.closest('.product-item');
+            const item = e.target.closest('.product-item');
             const unit = e.target.value;
-            const bulkGroups = productItem.querySelectorAll('.bulk-group');
-            const bulkLabels = productItem.querySelectorAll('.bulk-label');
-            const perPiecePurchase = productItem.querySelector('.per-piece-purchase');
-            const perPieceSell = productItem.querySelector('.per-piece-sell');
-
-            // Show/hide bulk groups based on unit selection
-            bulkGroups.forEach(group => group.classList.toggle('hidden', unit === 'piece'));
-
-            let labelText = '';
-            if (unit === 'dozen') labelText = '(per dozen)';
-            else if (unit === 'carton') labelText = '(per carton)';
-
-            bulkLabels.forEach(label => label.textContent = labelText);
-
-            // For piece units, allow direct input. For bulk units, make calculated fields read-only
-            if (unit === 'piece') {
-                perPiecePurchase.readOnly = false;
-                perPieceSell.readOnly = false;
-                perPiecePurchase.classList.remove('bg-blue-50');
-                perPieceSell.classList.remove('bg-blue-50');
-            } else {
-                perPiecePurchase.readOnly = true;
-                perPieceSell.readOnly = true;
-                perPiecePurchase.classList.add('bg-blue-50');
-                perPieceSell.classList.add('bg-blue-50');
-            }
-
-            // Recalculate prices when unit changes
-            calculatePrices(productItem);
+            const isBulk = unit !== 'piece';
+            item.querySelectorAll('.bulk-group').forEach(g => g.classList.toggle('hidden', !isBulk));
+            item.querySelectorAll('.bulk-label').forEach(l => {
+                l.textContent = unit === 'dozen' ? '{{ __("(per dozen)") }}' : unit === 'carton' ? '{{ __("(per carton)") }}' : '';
+            });
+            const perPiece = item.querySelector('.per-piece-purchase');
+            const perSell = item.querySelector('.per-piece-sell');
+            perPiece.readOnly = isBulk;
+            perSell.readOnly = isBulk;
+            perPiece.classList.toggle('bg-blue-50', isBulk);
+            perSell.classList.toggle('bg-blue-50', isBulk);
+            calculatePrices(item);
         }
     });
 
-    // Number input formatting
     document.addEventListener('input', function(e) {
-        if (e.target.classList.contains('number-input')) {
-            formatNumberInput(e.target);
-        }
-
-        // Calculate prices when relevant inputs change
-        if (e.target.classList.contains('bulk-purchase') ||
-            e.target.classList.contains('bulk-sell') ||
-            e.target.classList.contains('per-piece-purchase') ||
-            e.target.classList.contains('per-piece-sell') ||
-            e.target.classList.contains('quantity-input')) {
-            const productItem = e.target.closest('.product-item');
-            calculatePrices(productItem);
+        if (e.target.classList.contains('number-input')) formatNumberInput(e.target);
+        if (['bulk-purchase','bulk-sell','per-piece-purchase','per-piece-sell','quantity-input'].some(c => e.target.classList.contains(c))) {
+            calculatePrices(e.target.closest('.product-item'));
         }
     });
 
-    // Barcode scanner
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.scan-btn')) {
-            openScanner(e.target.closest('.scan-btn'));
-        }
+        if (e.target.closest('.scan-btn')) openScanner(e.target.closest('.scan-btn'));
     });
 
     document.getElementById('close-scanner').addEventListener('click', closeScanner);
-    document.getElementById('retry-scan').addEventListener('click', function() {
+    document.getElementById('retry-scan').addEventListener('click', async function() {
         document.getElementById('scanner-feedback').textContent = '';
-        document.getElementById('retry-scan').classList.add('hidden');
-        startScanning();
+        this.classList.add('hidden');
+        document.getElementById('toggle-torch').classList.add('hidden');
+        torchOn = false;
+        try { await startScanning(); } catch (e) { /* handled inside */ }
+    });
+
+    document.getElementById('toggle-torch').addEventListener('click', function() {
+        if (!currentStream) return;
+        const track = currentStream.getVideoTracks()[0];
+        if (track && track.applyConstraints) {
+            torchOn = !torchOn;
+            track.applyConstraints({ advanced: [{ torch: torchOn }] }).catch(() => {});
+        }
     });
 
     function attachEventListeners(element) {
         element.querySelector('.unit-select').addEventListener('change', function(e) {
-            const productItem = e.target.closest('.product-item');
+            const item = e.target.closest('.product-item');
             const unit = e.target.value;
-            const bulkGroups = productItem.querySelectorAll('.bulk-group');
-            const bulkLabels = productItem.querySelectorAll('.bulk-label');
-            const perPiecePurchase = productItem.querySelector('.per-piece-purchase');
-            const perPieceSell = productItem.querySelector('.per-piece-sell');
-
-            bulkGroups.forEach(group => group.classList.toggle('hidden', unit === 'piece'));
-
-            let labelText = '';
-            if (unit === 'dozen') labelText = '(per dozen)';
-            else if (unit === 'carton') labelText = '(per carton)';
-
-            bulkLabels.forEach(label => label.textContent = labelText);
-
-            if (unit === 'piece') {
-                perPiecePurchase.readOnly = false;
-                perPieceSell.readOnly = false;
-                perPiecePurchase.classList.remove('bg-blue-50');
-                perPieceSell.classList.remove('bg-blue-50');
-            } else {
-                perPiecePurchase.readOnly = true;
-                perPieceSell.readOnly = true;
-                perPiecePurchase.classList.add('bg-blue-50');
-                perPieceSell.classList.add('bg-blue-50');
-            }
-
-            calculatePrices(productItem);
+            const isBulk = unit !== 'piece';
+            item.querySelectorAll('.bulk-group').forEach(g => g.classList.toggle('hidden', !isBulk));
+            item.querySelectorAll('.bulk-label').forEach(l => {
+                l.textContent = unit === 'dozen' ? '{{ __("(per dozen)") }}' : unit === 'carton' ? '{{ __("(per carton)") }}' : '';
+            });
+            const perPiece = item.querySelector('.per-piece-purchase');
+            const perSell = item.querySelector('.per-piece-sell');
+            perPiece.readOnly = isBulk;
+            perSell.readOnly = isBulk;
+            perPiece.classList.toggle('bg-blue-50', isBulk);
+            perSell.classList.toggle('bg-blue-50', isBulk);
+            calculatePrices(item);
         });
-
         element.querySelectorAll('.number-input').forEach(input => {
-            input.addEventListener('input', function(e) {
-                formatNumberInput(e.target);
+            input.addEventListener('input', function() {
+                formatNumberInput(this);
                 calculatePrices(element);
             });
         });
-
         element.querySelector('.scan-btn').addEventListener('click', function(e) {
             openScanner(e.target.closest('.scan-btn'));
         });
     }
 
     function formatNumberInput(input) {
-        let value = input.value.replace(/,/g, '');
-        if (!isNaN(value) && value !== '') {
-            input.value = parseFloat(value).toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
+        let v = input.value.replace(/,/g, '');
+        if (!isNaN(v) && v !== '') input.value = parseInt(v).toLocaleString('en-US');
     }
 
-    function calculatePrices(productItem) {
-        const unit = productItem.querySelector('.unit-select').value;
-        const quantity = parseInt(productItem.querySelector('.quantity-input').value) || 0;
-        const bulkPurchase = parseFloat(productItem.querySelector('.bulk-purchase').value.replace(/,/g, '')) || 0;
-        const bulkSell = parseFloat(productItem.querySelector('.bulk-sell').value.replace(/,/g, '')) || 0;
-        const perPiecePurchaseInput = productItem.querySelector('.per-piece-purchase');
-        const perPieceSellInput = productItem.querySelector('.per-piece-sell');
-        const profitDisplay = productItem.querySelector('.profit-display');
-
-        let perPiecePurchase, perPieceSell;
-
+    function calculatePrices(item) {
+        const unit = item.querySelector('.unit-select').value;
+        const qty = parseInt(item.querySelector('.quantity-input').value) || 0;
+        const bulkP = parseFloat(item.querySelector('.bulk-purchase')?.value.replace(/,/g, '')) || 0;
+        const bulkS = parseFloat(item.querySelector('.bulk-sell')?.value.replace(/,/g, '')) || 0;
+        const ppInput = item.querySelector('.per-piece-purchase');
+        const spInput = item.querySelector('.per-piece-sell');
+        const profitEl = item.querySelector('.profit-display');
+        let pp, sp;
         if (unit === 'piece') {
-            // For piece units, use direct input values
-            perPiecePurchase = parseFloat(perPiecePurchaseInput.value.replace(/,/g, '')) || 0;
-            perPieceSell = parseFloat(perPieceSellInput.value.replace(/,/g, '')) || 0;
+            pp = parseFloat(ppInput.value.replace(/,/g, '')) || 0;
+            sp = parseFloat(spInput.value.replace(/,/g, '')) || 0;
         } else {
-            // For bulk units, calculate from bulk prices
-            let piecesPerUnit = 1;
-            if (unit === 'dozen') piecesPerUnit = 12;
-            else if (unit === 'carton') piecesPerUnit = 24;
-
-            perPiecePurchase = bulkPurchase / piecesPerUnit;
-            perPieceSell = bulkSell / piecesPerUnit;
-
-            // Update the calculated fields
-            perPiecePurchaseInput.value = perPiecePurchase.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-            perPieceSellInput.value = perPieceSell.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+            const perUnit = unit === 'dozen' ? 12 : 24;
+            pp = bulkP / perUnit;
+            sp = bulkS / perUnit;
+            ppInput.value = parseInt(pp).toLocaleString('en-US');
+            spInput.value = parseInt(sp).toLocaleString('en-US');
         }
-
-        // Calculate and display profit
-        if (perPiecePurchase > 0 && perPieceSell > 0) {
-            const profitPerPiece = perPieceSell - perPiecePurchase;
-            const margin = (profitPerPiece / perPiecePurchase) * 100;
-            const totalProfit = profitPerPiece * quantity;
-
-            productItem.querySelector('.profit-amount').textContent = `$${profitPerPiece.toFixed(2)}`;
-            productItem.querySelector('.profit-margin').textContent = `${margin.toFixed(1)}%`;
-            productItem.querySelector('.total-profit').textContent = `$${totalProfit.toFixed(2)}`;
-
-            profitDisplay.classList.remove('hidden');
+        if (pp > 0 && sp > 0) {
+            const profitPer = sp - pp;
+            const margin = (profitPer / pp) * 100;
+            item.querySelector('.profit-amount').textContent = `UGx ${parseInt(profitPer).toLocaleString('en-US')}`;
+            item.querySelector('.profit-margin').textContent = `${margin.toFixed(1)}%`;
+            item.querySelector('.total-profit').textContent = `UGx ${parseInt(profitPer * qty).toLocaleString('en-US')}`;
+            profitEl.classList.remove('hidden');
         } else {
-            profitDisplay.classList.add('hidden');
+            profitEl.classList.add('hidden');
         }
     }
 
-    function openScanner(button) {
+    async function openScanner(button) {
         currentScanner = button;
         const modal = document.getElementById('scanner-modal');
-        const feedback = document.getElementById('scanner-feedback');
-
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        feedback.textContent = 'Initializing camera...';
-        feedback.className = 'text-xs sm:text-sm text-blue-600 min-h-6 mb-4';
-
-        startScanning();
+        document.getElementById('toggle-torch').classList.add('hidden');
+        torchOn = false;
+        setFeedback('{{ __('Initializing camera...') }}', 'text-blue-600');
+        await startScanning();
     }
 
-    function startScanning() {
+    function setFeedback(text, color) {
+        const fb = document.getElementById('scanner-feedback');
+        fb.textContent = text;
+        fb.className = `text-xs sm:text-sm ${color} min-h-6 mb-3 sm:mb-4`;
+    }
+
+    function stopMediaTracks() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(t => t.stop());
+            currentStream = null;
+        }
+    }
+
+    async function startScanning() {
         const video = document.getElementById('barcode-video');
-        const feedback = document.getElementById('scanner-feedback');
+        stopMediaTracks();
+        document.getElementById('toggle-torch').classList.add('hidden');
+        torchOn = false;
 
-        codeReader.decodeFromVideoDevice(null, video, (result, err) => {
-            if (result) {
-                const skuInput = currentScanner.closest('.product-item').querySelector('.sku-input');
-                skuInput.value = result.text;
+        try {
+            // Prefer rear camera with environment facing mode
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const cameras = devices.filter(d => d.kind === 'videoinput');
+            const rearCam = cameras.find(d => /back|environment|rear/i.test(d.label));
+            selectedDeviceId = rearCam ? rearCam.deviceId : (cameras[0]?.deviceId || null);
 
-                feedback.textContent = '✅ Barcode scanned successfully!';
-                feedback.className = 'text-xs sm:text-sm text-green-600 min-h-6 mb-4';
+            const constraints = {
+                video: {
+                    deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+                    facingMode: selectedDeviceId ? undefined : 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
+            };
 
-                document.getElementById('retry-scan').classList.remove('hidden');
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = currentStream;
 
-                // Auto-close after 2 seconds
-                setTimeout(() => {
-                    closeScanner();
-                }, 2000);
+            // Check torch availability
+            const track = currentStream.getVideoTracks()[0];
+            if (track && track.getCapabilities) {
+                const caps = track.getCapabilities();
+                torchAvailable = !!(caps && caps.torch);
+                if (torchAvailable) document.getElementById('toggle-torch').classList.remove('hidden');
             }
-            if (err && !(err instanceof ZXing.NotFoundException)) {
-                feedback.textContent = 'Scanner error: ' + err.message;
-                feedback.className = 'text-xs sm:text-sm text-red-600 min-h-6 mb-4';
+
+            codeReader.decodeFromVideoElement(video, (result, err) => {
+                if (result) {
+                    const item = currentScanner.closest('.product-item');
+                    const sku = result.text;
+                    item.querySelector('.sku-input').value = sku;
+                    setFeedback('{{ __("✅ Barcode scanned! Looking up product...") }}', 'text-green-600');
+                    fetch(`/inventory/lookup/${encodeURIComponent(sku)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.found) {
+                                item.querySelector('input[name$="[name]"]').value = data.name;
+                                if (data.quantity) item.querySelector('.quantity-input').value = data.quantity;
+                                if (data.unit) {
+                                    item.querySelector('.unit-select').value = data.unit;
+                                    item.querySelector('.unit-select').dispatchEvent(new Event('change'));
+                                }
+                                if (data.purchase_price) {
+                                    item.querySelector('.per-piece-purchase').value = data.purchase_price;
+                                    if (data.purchase_price_bulk) item.querySelector('.bulk-purchase').value = data.purchase_price_bulk;
+                                }
+                                if (data.price) {
+                                    item.querySelector('.per-piece-sell').value = data.price;
+                                    if (data.selling_price_bulk) item.querySelector('.bulk-sell').value = data.selling_price_bulk;
+                                }
+                                calculatePrices(item);
+                                setFeedback('{{ __("✅ Product auto-filled!") }}', 'text-green-600');
+                            } else {
+                                setFeedback('{{ __("✅ Barcode scanned!") }}', 'text-green-600');
+                            }
+                        })
+                        .catch(() => setFeedback('{{ __("✅ Barcode scanned!") }}', 'text-green-600'));
+                    document.getElementById('retry-scan').classList.remove('hidden');
+                    document.getElementById('toggle-torch').classList.add('hidden');
+                    if (torchOn) { torchOn = false; }
+                    setTimeout(closeScanner, 1500);
+                }
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    setFeedback('{{ __('Scanner error:') }} ' + err.message, 'text-red-600');
+                }
+            });
+        } catch (err) {
+            if (err.name === 'NotAllowedError') {
+                setFeedback('{{ __("Camera access denied. Please allow camera permissions in your browser settings.") }}', 'text-red-600');
+            } else if (err.name === 'NotFoundError') {
+                setFeedback('{{ __("No camera found on this device.") }}', 'text-red-600');
+            } else {
+                setFeedback('{{ __("Camera error:") }} ' + err.message, 'text-red-600');
             }
-        }).catch(err => {
-            feedback.textContent = 'Camera access denied. Please allow camera permissions.';
-            feedback.className = 'text-xs sm:text-sm text-red-600 min-h-6 mb-4';
-        });
+        }
     }
 
     function closeScanner() {
@@ -619,10 +600,17 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         codeReader.reset();
+        stopMediaTracks();
         document.getElementById('retry-scan').classList.add('hidden');
+        document.getElementById('toggle-torch').classList.add('hidden');
+        torchOn = false;
     }
 
-    // Initialize event listeners for the first product
+    // Close modal on backdrop click
+    document.getElementById('scanner-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeScanner();
+    });
+
     attachEventListeners(document.querySelector('.product-item'));
 });
 </script>
@@ -643,7 +631,6 @@ document.addEventListener('DOMContentLoaded', function() {
     animation: fadeInUp 0.5s ease-out;
 }
 
-/* Custom number input styling */
 input[type="number"] {
     -moz-appearance: textfield;
 }
@@ -653,13 +640,10 @@ input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
-/* Scanner modal animations */
 #scanner-modal {
     animation: fadeInUp 0.3s ease-out;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -679,14 +663,15 @@ input[type="number"]::-webkit-inner-spin-button {
     background: #94a3b8;
 }
 
-/* Responsive text adjustments */
 @media (max-width: 640px) {
     .product-item {
-        padding: 1rem;
+        padding: 0.75rem;
+    }
+    button {
+        min-height: 40px;
     }
 }
 
-/* Touch-friendly buttons */
 @media (hover: none) and (pointer: coarse) {
     button {
         min-height: 44px;
@@ -694,3 +679,4 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 </style>
 @endsection
+

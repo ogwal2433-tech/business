@@ -23,8 +23,4 @@ class Purchase extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getTotalAmountAttribute()
-    {
-        return $this->quantity * $this->price_per_unit;
-    }
 }

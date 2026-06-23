@@ -1,0 +1,12 @@
+{
+  "appUrl": "http://127.0.0.1:8000",
+  "devUrl": "http://127.0.0.1:8000",
+  "appName": "SmartBiz",
+  "windowWidth": 1200,
+  "windowHeight": 800,
+  "minWidth": 900,
+  "minHeight": 600,
+  "enableTray": true,
+  "startMinimized": false,
+  "autoUpdates": false
+}

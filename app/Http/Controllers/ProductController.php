@@ -56,45 +56,22 @@ class ProductController extends Controller
     // }
 public function update(Request $request, $id)
 {
-    // Step 1: Find the product
     $product = Product::where('id', $id)
                       ->where('admin_id', auth()->id())
                       ->firstOrFail();
 
-    // Step 2: Validate input
     $validated = $request->validate([
-        'sku' => 'required|string|max:255',
-        'name' => 'required|string|max:255',
-        'quantity' => 'required|integer|min:0',
-        'purchase_price' => 'required|numeric|min:0',
-        'price' => 'required|numeric|min:0',
+        'purchase_price' => 'nullable|numeric|min:0',
+        'price' => 'nullable|numeric|min:0',
+        'purchase_price_per_dozen' => 'nullable|numeric|min:0',
+        'selling_price_per_dozen' => 'nullable|numeric|min:0',
+        'purchase_price_per_carton' => 'nullable|numeric|min:0',
+        'selling_price_per_carton' => 'nullable|numeric|min:0',
     ]);
 
-    // Step 3: Check if quantity has changed
-    if ($product->quantity != $validated['quantity']) {
-        $previousQuantity = $product->quantity;
-        $newQuantity = $validated['quantity'];
-        $difference = $newQuantity - $previousQuantity;
-
-        // Step 4: Determine type
-        $type = $difference > 0 ? 'increase' : 'decrease';
-
-        // Step 5: Create history record
-        InventoryHistory::create([
-            'product_id' => $product->id,
-            'user_id' => auth()->id(),
-            'type' => $type,
-            'quantity' => abs($difference),
-            'previous_quantity' => $previousQuantity,
-            'new_quantity' => $newQuantity,
-            'note' => 'Quantity updated via product edit',
-        ]);
-    }
-
-    // Step 6: Update the product
     $product->update($validated);
 
-    return redirect()->route('products.index')->with('success', 'Product updated successfully.');
+    return redirect()->route('products.index')->with('success', __('Product updated successfully.'));
 }
 
     /**
@@ -108,7 +85,7 @@ public function update(Request $request, $id)
 
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+        return redirect()->route('products.index')->with('success', __('Product deleted successfully.'));
     }
 
     /**
@@ -136,26 +113,41 @@ public function update(Request $request, $id)
         $product->admin_id = auth()->id(); // Assign ownership
         $product->save();
 
-        return redirect()->route('products.index')->with('success', 'Product created successfully.');
+        return redirect()->route('products.index')->with('success', __('Product created successfully.'));
     }
-    public function search(Request $request)
-{
-    $query = Product::query();
-
-    if ($request->filled('search')) {
-        $search = $request->input('search');
-        $query->where('name', 'like', "%{$search}%")
-              ->orWhere('sku', 'like', "%{$search}%");
+public function salesReport(Request $request){
+    $user = Auth::user();
+    if (! $user->isAdmin()) {
+        abort(403, 'Unauthorized access.');
     }
 
-    $products = $query->paginate(10);
+    $request->validate([
+        'date' => 'nullable|date',
+    ]);
 
-    return view('inventory.list', compact('products'));
+    $date = $request->input('date');
+    $filters = ['date' => $date];
+
+    $baseQuery = Sale::where('admin_id', $user->id);
+
+    if ($date) {
+        $baseQuery->whereDate('created_at', $date);
+    }
+
+    $sales = (clone $baseQuery)->with(['product', 'user'])->orderBy('created_at', 'desc')->paginate(15);
+    $totalAmount = (clone $baseQuery)->sum('total_amount');
+    $totalQuantity = (clone $baseQuery)->sum('quantity');
+
+    $todayQuery = Sale::where('admin_id', $user->id)->whereDate('created_at', today());
+    $adminSalesToday = $todayQuery->sum('total_amount');
+
+    $monthQuery = Sale::where('admin_id', $user->id)
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year);
+    $adminMonthlySales = $monthQuery->sum('total_amount');
+
+    return view('adminR', compact('sales', 'totalAmount', 'totalQuantity', 'filters', 'adminSalesToday', 'adminMonthlySales'));
 }
-// public function salesReport(){
-
-//     return view('adminR');
-// }
 
 public function salesEmp(Request $request)
 {

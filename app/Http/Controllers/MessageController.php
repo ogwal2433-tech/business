@@ -41,7 +41,7 @@ class MessageController extends Controller
             'status' => 'unread',
         ]);
 
-        return redirect()->route('chat.index')->with('success', 'Message sent!');
+        return redirect()->route('chat.index')->with('success', __('Message sent!'));
     }
 
     // Admin message list
@@ -49,6 +49,10 @@ class MessageController extends Controller
 {
     $user = Auth::user();
 
+    if (!$user->planHasFeature('messages')) {
+        return redirect()->route('admin.subscription.my')
+            ->with('error', __('Messages are not available on your current plan.'));
+    }
 
     $messages = Message::with('user')
         ->where('deleted_for_admin', false)
@@ -77,7 +81,7 @@ class MessageController extends Controller
         $message->status = 'responded';
         $message->save();
 
-        return redirect()->back()->with('success', 'Reply sent successfully!');
+        return redirect()->back()->with('success', __('Reply sent successfully!'));
     }
 
     // Delete message for user/admin or everyone
@@ -107,10 +111,17 @@ class MessageController extends Controller
             $message->save();
         }
 
-        return redirect()->back()->with('success', 'Message deleted successfully.');
+        return redirect()->back()->with('success', __('Message deleted successfully.'));
     }
     public function adminSend(Request $request)
 {
+    $user = Auth::user();
+
+    if (!$user->planHasFeature('messages')) {
+        return redirect()->route('admin.subscription.my')
+            ->with('error', __('Messages are not available on your current plan.'));
+    }
+
     $request->validate([
         'employee_id' => 'required|exists:users,id',
         'message' => 'required|string',
@@ -123,7 +134,7 @@ class MessageController extends Controller
         'status' => 'Pending',
     ]);
 
-    return redirect()->route('admin.messages.sent')->with('success', 'Message sent to employee successfully!');
+    return redirect()->route('admin.messages.sent')->with('success', __('Message sent to employee successfully!'));
 }
 public function sent()
 {

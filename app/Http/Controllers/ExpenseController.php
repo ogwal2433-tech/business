@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 use App\Models\Expense;
 use App\Models\Sale;
 use App\Models\JournalEntry;
+use App\Models\AdminExpense;
+use Illuminate\Support\Facades\Auth;
+
 use App\Models\JournalLine;
 use App\Models\Account;
 use Illuminate\Http\Request;
@@ -23,32 +26,47 @@ class ExpenseController extends Controller
     /**
      * Store the submitted expense.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'category' => 'required|string|max:100',
-            'date' => 'required|date',
-            'description' => 'nullable|string|max:1000',
-        ]);
-
-        Expense::create([
-            ...$validated,
-            'employee_id' => auth()->id(),
-        ]);
-
-        return redirect()->
-            back()->with('success', '✅ Expense recorded successfully.');
-    }
-    public function index()
+ public function store(Request $request)
 {
-    $expenses = Expense::where('employee_id', auth()->id())
-                        ->latest()
-                        ->paginate(10);
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'amount' => 'required|numeric|min:0',
+        'category' => 'required|string|max:100',
+        'date' => 'required|date',
+        'description' => 'nullable|string|max:1000',
+    ]);
+
+    $user = auth()->user();
+
+    $adminId = $user->isAdmin() ? $user->id : $user->admin_id;
+
+    Expense::create([
+        ...$validated,
+        'employee_id' => $user->isAdmin() ? null : $user->id,
+        'admin_id' => $adminId,
+    ]);
+
+    return back()->with('success', __('Expense recorded successfully.'));
+}
+
+public function index()
+{
+    $admin = auth()->user();
+
+    if (!$admin->isAdmin()) {
+        abort(403);
+    }
+
+    $expenses = Expense::with('employee')
+        ->whereHas('employee', function ($query) use ($admin) {
+            $query->where('admin_id', $admin->id);
+        })
+        ->latest()
+        ->paginate(10);
 
     return view('expenses.index', compact('expenses'));
 }
+
 
     public function destroy(Expense $expense)
 {
@@ -60,7 +78,7 @@ class ExpenseController extends Controller
     $expense->delete();
 
     return redirect()->route('employee.expenses.index')
-                     ->with('success', '✅ Expense deleted successfully.');
+                     ->with('success', __('Expense deleted successfully.'));
 }
 public function edit(Expense $expense)
 {
@@ -81,7 +99,7 @@ public function update(Request $request, Expense $expense)
 
     return redirect()
         ->route('employee.expenses.index')
-        ->with('success', '✅ Expense updated successfully.');
+        ->with('success', __('Expense updated successfully.'));
 }
 public function adminSalesWithExpenses()
 {
@@ -111,30 +129,43 @@ public function adminSalesWithExpenses()
 }
 //operational cost
 public function returnOperationalcost(){
-    return view('journal_entries.admincost');
+    return view('admin.expense');
 }
 public function storeoperationalcost(Request $request)
 {
     $request->validate([
-        'description' => 'required|string|max:255',
-        'entry_date' => 'required|date',
-        'amount' => 'required|numeric|min:0.01',
+        'title'       => 'required|string|max:255',
+        'amount'      => 'required|numeric|min:0',
+        'category'    => 'required|string',
+        'date'        => 'required|date',
+        'description' => 'nullable|string',
+        'entry_date'  => 'required|date',
     ]);
 
-    $adminId = auth()->id();
+    $adminId = Auth::id();
+
+    AdminExpense::create([
+        'title'       => $request->title,
+        'amount'      => $request->amount,
+        'category'    => $request->category,
+        'date'        => $request->date,
+        'description' => $request->description,
+        'admin_id'    => $adminId,
+    ]);
 
     $reference = 'EXP-' . now()->format('YmdHis');
 
     $journalEntry = JournalEntry::create([
         'reference'   => $reference,
         'description' => $request->description,
-        'entry_date'  => $request->entry_date, 
+        'entry_date'  => $request->entry_date,
         'admin_id'    => $adminId,
     ]);
 
     $expenseAccount = Account::where('code', '6000')->where('admin_id', $adminId)->firstOrFail();
     $cashAccount    = Account::where('code', '1000')->where('admin_id', $adminId)->firstOrFail();
 
+    // 5️⃣ Create journal lines
     JournalLine::create([
         'journal_entry_id' => $journalEntry->id,
         'account_id'       => $expenseAccount->id,
@@ -153,8 +184,7 @@ public function storeoperationalcost(Request $request)
         'updated_at'       => now(),
     ]);
 
-    return redirect()->back()->with('success', 'Operational expense recorded successfully.');
+    return redirect()->back()->with('success', __('Operational expense recorded successfully.'));
 }
-
 
 }

@@ -45,7 +45,7 @@
       <i class="bi bi-arrow-left"></i> Back to Dashboard
     </a>
     <h2 class="mb-0"><i class="bi bi-chat-dots"></i> My Messages Inbox with Manager/boss</h2>
-    <div style="width: 140px;"><!-- placeholder to keep center aligned --></div>
+    <div class="hidden sm:block" style="width: 140px;"><!-- placeholder to keep center aligned --></div>
   </div>
 </div>
   <h2 class="mb-4"><i class="bi bi-chat-dots"></i> get started</h2>
@@ -88,4 +88,46 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var chatBody = document.querySelector('.chat-body');
+    var lastCheck = new Date().toISOString();
+
+    function pollMessages() {
+        fetch('/api/messages/new?since=' + encodeURIComponent(lastCheck))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.messages && data.messages.length > 0) {
+                    lastCheck = new Date().toISOString();
+                    var emptyState = chatBody.querySelector('.text-center.text-muted');
+                    if (emptyState) emptyState.remove();
+
+                    data.messages.forEach(function(m) {
+                        if (m.message) {
+                            var empMsg = document.createElement('div');
+                            empMsg.className = 'message-box employee-msg align-self-end animate-fade-in';
+                            empMsg.innerHTML = m.message.replace(/\n/g, '<br>') + '<div class="timestamp">' + m.created_at + '</div>';
+                            chatBody.appendChild(empMsg);
+                        }
+                        if (m.admin_reply) {
+                            var adminMsg = document.createElement('div');
+                            adminMsg.className = 'message-box admin-reply align-self-start animate-fade-in';
+                            adminMsg.innerHTML = m.admin_reply.replace(/\n/g, '<br>') + '<div class="timestamp">' + m.created_at + '</div>';
+                            chatBody.appendChild(adminMsg);
+                        }
+                    });
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }
+            })
+            .catch(function() {});
+    }
+
+    setInterval(pollMessages, 5000);
+});
+</script>
+<style>
+  @keyframes fadeInMsg { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+  .animate-fade-in { animation: fadeInMsg 0.3s ease-out; }
+</style>
 @endsection

@@ -73,7 +73,7 @@ public function suspend($id)
     $employee->status = User::STATUS_SUSPENDED;
     $employee->save();
 
-    return back()->with('success', 'Employee suspended successfully.');
+    return back()->with('success', __('Employee suspended successfully.'));
 }
 
     public function store(Request $request)
@@ -93,7 +93,7 @@ public function suspend($id)
         ]);
 
         return redirect()->route('admin.employees.index')
-                         ->with('success', 'Employee created successfully.');
+                         ->with('success', __('Employee created successfully.'));
     }
 public function reactivate($id)
 {
@@ -101,7 +101,7 @@ public function reactivate($id)
     $employee->status = 'active';
     $employee->save();
 
-    return back()->with('success', 'Employee reactivated successfully.');
+    return back()->with('success', __('Employee reactivated successfully.'));
 }
     public function edit($id)
     {
@@ -124,7 +124,7 @@ public function reactivate($id)
         ]);
 
         return redirect()->route('admin.employees.index')
-                         ->with('success', 'Employee updated successfully.');
+                         ->with('success', __('Employee updated successfully.'));
     }
 
     public function destroy($id)
@@ -133,19 +133,10 @@ public function reactivate($id)
         $employee->delete();
 
         return redirect()->route('admin.employees.index')
-                         ->with('success', 'Employee deleted.');
+                         ->with('success', __('Employee deleted.'));
     }
 
-    public function toggleStatus($id)
-    {
-        $employee = User::findOrFail($id);
-        $employee->status = !$employee->status;
-        $employee->save();
-
-        return redirect()->route('admin.employees.index')
-                         ->with('success', 'Employee status updated.');
-    }
-     public function storemployee(Request $request)
+    public function storemployee(Request $request)
 {
     $request->validate([
         'name' => 'required|string|max:255',
@@ -154,6 +145,13 @@ public function reactivate($id)
         'password' => 'required|string|min:6|confirmed',
     ]);
 
+    $user = auth()->user();
+
+    if (!$user->canAddMoreEmployees()) {
+        return redirect()->route('admin.employees.create')
+            ->with('error', __('Employee limit reached. Upgrade your plan to add more employees.'));
+    }
+
     $employee = User::create([
         'name' => $request->name,
         'username' => $request->username,
@@ -161,10 +159,10 @@ public function reactivate($id)
         'password' => Hash::make($request->password),
         'role' => 'employee',
         'status' => 'active',
-        'admin_id' => auth()->id(),
+        'admin_id' => $user->id,
     ]);
 
     return redirect()->route('admin.employees.create')
-        ->with('success', 'Employee created successfully.');
+        ->with('success', __('Employee created successfully.'));
 }
 }

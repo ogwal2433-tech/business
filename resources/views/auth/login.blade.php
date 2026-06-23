@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login - SmartBiz</title>
+    <title>{{ __('Login') }} - SmartBiz</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
         /* Reset and core layout */
@@ -15,12 +15,21 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #cfe8ff;
             background: linear-gradient(to top right, #cfe8ff, #ffffff, #cbdff7);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
         }
 
         .login-container {
@@ -29,7 +38,6 @@
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             padding: 2.5rem;
-            max-width: 400px;
             width: 100%;
             animation: fadeInDown 0.5s ease-out;
         }
@@ -79,7 +87,7 @@
             border: 1px solid #d1d5db;
             border-radius: 8px;
             transition: border-color 0.3s, box-shadow 0.3s;
-            font-size: 0.95rem;
+            font-size: 16px;
         }
 
         input:focus {
@@ -90,7 +98,7 @@
 
         .toggle-password {
             position: absolute;
-            top: 36px;
+            top: 38px;
             right: 15px;
             cursor: pointer;
             user-select: none;
@@ -171,35 +179,43 @@
 
         /* Footer styles */
         footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
+            width: 100%;
             text-align: center;
+            padding: 1.5rem 1rem 1rem;
             font-size: 0.85rem;
             color: #6b7280;
-            z-index: 10;
         }
 
-        /* Add padding to body to account for fixed footer */
-        body {
-            padding-bottom: 80px;
+        @media (max-width: 480px) {
+            body { padding: 1rem; }
+            .login-container { padding: 1.5rem; }
+            h2 { font-size: 1.35rem; }
+            .subtitle { font-size: 0.8rem; margin-bottom: 1rem; }
+        }
+
+        @media (max-width: 360px) {
+            body { padding: 0.5rem; }
+            .login-container { padding: 1rem; border-radius: 12px; }
+            h2 { font-size: 1.15rem; }
+            .subtitle { font-size: 0.75rem; }
+            input[type="text"],
+            input[type="password"] { font-size: 16px; padding: 0.6rem 0.7rem; }
+            button { padding: 0.7rem; font-size: 0.85rem; }
+            .toggle-password { top: 32px; right: 12px; }
+            footer { padding: 1rem 0.5rem 0.5rem; font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
+    <div class="login-wrapper">
+        <div class="login-container">
         <div class="back-to-home">
-            <a href="/">← Back to Home</a>
+            <a href="/">← {{ __('Back to Home') }}</a>
         </div>
 
-        <h2>Welcome Back to <span style="color: #3b82f6;">SmartBiz</span></h2>
-        <p class="subtitle">Please enter your credentials to continue</p>
+        <h2>{{ __('Welcome Back to') }} <span style="color: #3b82f6;">SmartBiz</span></h2>
+        <p class="subtitle">{{ __('Please enter your credentials to continue') }}</p>
 
         <!-- Laravel session error (optional) -->
         @if(session('error'))
@@ -214,14 +230,14 @@
 @endif
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const alert = document.querySelector('.alert-success');
-        if (alert) {
-            setTimeout(() => {
-                alert.style.transition = 'opacity 0.5s ease';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500); // Remove after fade out
-            }, 3000); // 3 seconds
-        }
+        document.querySelectorAll('.alert, .alert-success').forEach(function(el) {
+            setTimeout(function() {
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-10px)';
+                setTimeout(function() { el.remove(); }, 500);
+            }, 3000);
+        });
     });
 </script>
 
@@ -231,7 +247,7 @@
 
             <!-- Username -->
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">{{ __('Username') }}</label>
                 <input
                     type="text"
                     name="username"
@@ -239,7 +255,7 @@
                     required
                     autofocus
                     value="{{ old('username') }}"
-                    placeholder="Enter your username"
+                    placeholder="{{ __('Enter your username') }}"
                 />
                 @error('username')
                     <div class="error-message">{{ $message }}</div>
@@ -248,13 +264,13 @@
 
             <!-- Password with Eye Toggle -->
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">{{ __('Password') }}</label>
                 <input
                     type="password"
                     name="password"
                     id="password"
                     required
-                    placeholder="Enter your password"
+                    placeholder="{{ __('Enter your password') }}"
                 />
                 <span class="toggle-password" onclick="togglePassword()">👁️</span>
                 @error('password')
@@ -262,27 +278,28 @@
                 @enderror
             </div>
 
-            <button type="submit">Login</button>
+            <button type="submit">{{ __('Login') }}</button>
         </form>
 
         <!-- Register link -->
         @auth
             @if(auth()->user()->role === 'admin')
                 <div class="register-info">
-                    Need a new account?
-                    <a href="{{ route('register') }}">Register</a>
+                    {{ __('Need a new account?') }}
+                    <a href="{{ route('register') }}">{{ __('Register') }}</a>
                 </div>
             @endif
         @else
             <div class="register-info">
-                Don't have an account? <a href="/register">Sign up</a>
+                {{ __("Don't have an account?") }} <a href="/register">{{ __('Sign up') }}</a>
             </div>
         @endauth
     </div>
 
     <footer>
-        &copy; 2025 SmartBiz Admin. All rights reserved.
+        &copy; 2025 SmartBiz Admin. {{ __('All rights reserved.') }}
     </footer>
+    </div>
 
     <!-- JavaScript for password toggle -->
     <script>

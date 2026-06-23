@@ -24,7 +24,7 @@ class Inventory extends Model
 {
     return $this->hasMany(InventoryHistory::class, 'inventory_id');
 }
-    // Set admin_d automatically when creating
+
     protected static function booted()
     {
         static::creating(function ($inventory) {
@@ -32,8 +32,5 @@ class Inventory extends Model
                 $inventory->admin_id = Auth::id();
             }
         });
-    }
-    function sale(){
-        return $this->hasMany(sale::class);
     }
 }
