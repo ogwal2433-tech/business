@@ -12,11 +12,11 @@
                 <i class="fas fa-calendar-day stat-icon text-blue-600"></i>
                 <div>
                     <h3>{{ __("Today's Sales") }}</h3>
-                    <p class="stat-value" id="stat-today">UGX {{ number_format($totalSalesToday, 2) }}</p>
+                    <p class="stat-value" id="stat-today">{{ businessCurrency() }} {{ number_format($totalSalesToday, 2) }}</p>
                     <p class="stat-sub">
-                        <span class="text-blue-600" id="stat-today-admin">{{ __('Admin') }}: UGX {{ number_format($todayAdminSales, 2) }}</span>
+                        <span class="text-blue-600" id="stat-today-admin">{{ __('Admin') }}: {{ businessCurrency() }} {{ number_format($todayAdminSales, 2) }}</span>
                         <span class="mx-1">|</span>
-                        <span class="text-green-600" id="stat-today-emp">{{ __('Team') }}: UGX {{ number_format($todayEmployeeSales, 2) }}</span>
+                        <span class="text-green-600" id="stat-today-emp">{{ __('Team') }}: {{ businessCurrency() }} {{ number_format($todayEmployeeSales, 2) }}</span>
                     </p>
                 </div>
             </div>
@@ -24,11 +24,11 @@
                 <i class="fas fa-chart-line stat-icon text-green-600"></i>
                 <div>
                     <h3>{{ __('Monthly Sales') }}</h3>
-                    <p class="stat-value" id="stat-monthly">UGX {{ number_format($totalMonthlySales, 2) }}</p>
+                    <p class="stat-value" id="stat-monthly">{{ businessCurrency() }} {{ number_format($totalMonthlySales, 2) }}</p>
                     <p class="stat-sub">
-                        <span class="text-blue-600" id="stat-monthly-admin">{{ __('Admin') }}: UGX {{ number_format($monthAdminSales, 2) }}</span>
+                        <span class="text-blue-600" id="stat-monthly-admin">{{ __('Admin') }}: {{ businessCurrency() }} {{ number_format($monthAdminSales, 2) }}</span>
                         <span class="mx-1">|</span>
-                        <span class="text-green-600" id="stat-monthly-emp">{{ __('Team') }}: UGX {{ number_format($monthEmployeeSales, 2) }}</span>
+                        <span class="text-green-600" id="stat-monthly-emp">{{ __('Team') }}: {{ businessCurrency() }} {{ number_format($monthEmployeeSales, 2) }}</span>
                     </p>
                 </div>
             </div>
@@ -36,11 +36,11 @@
                 <i class="fas fa-wallet stat-icon text-red-600"></i>
                 <div>
                     <h3>{{ __('Monthly Expenses') }}</h3>
-                    <p class="stat-value" id="stat-expenses">UGX {{ number_format($totalMonthlyExpenses, 2) }}</p>
+                    <p class="stat-value" id="stat-expenses">{{ businessCurrency() }} {{ number_format($totalMonthlyExpenses, 2) }}</p>
                     <p class="stat-sub">
-                        <span class="text-red-600" id="stat-expenses-admin">{{ __('Admin') }}: UGX {{ number_format($monthAdminExpenses ?? 0, 2) }}</span>
+                        <span class="text-red-600" id="stat-expenses-admin">{{ __('Admin') }}: {{ businessCurrency() }} {{ number_format($monthAdminExpenses ?? 0, 2) }}</span>
                         <span class="mx-1">|</span>
-                        <span class="text-orange-600" id="stat-expenses-emp">{{ __('Team') }}: UGX {{ number_format($monthEmployeeExpenses ?? 0, 2) }}</span>
+                        <span class="text-orange-600" id="stat-expenses-emp">{{ __('Team') }}: {{ businessCurrency() }} {{ number_format($monthEmployeeExpenses ?? 0, 2) }}</span>
                     </p>
                 </div>
             </div>
@@ -48,7 +48,7 @@
                 <i class="fas fa-chart-pie stat-icon text-{{ $netProfit >= 0 ? 'green' : 'red' }}-600"></i>
                 <div>
                     <h3>{{ __('Net Profit') }}</h3>
-                    <p class="stat-value {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}" id="stat-profit">UGX {{ number_format($netProfit, 2) }}</p>
+                    <p class="stat-value {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}" id="stat-profit">{{ businessCurrency() }} {{ number_format($netProfit, 2) }}</p>
                 </div>
             </div>
             <div class="stat-box">
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var chartsInitialized = false;
     var salesChart = null, expenseChart = null;
 
-    function formatUGX(v) { return 'UGX ' + Number(v).toLocaleString('en-UG', {minimumFractionDigits:2}); }
+    function formatCurrency(v) { return window.businessCurrency + ' ' + Number(v).toLocaleString('en-UG', {minimumFractionDigits:2}); }
 
     function numberLocale(v) { return Number(v).toLocaleString('en-UG', {minimumFractionDigits:2}); }
 
@@ -157,23 +157,23 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(d) {
                 var el = function(id) { return document.getElementById(id); };
                 if (el('stat-today')) {
-                    el('stat-today').textContent = formatUGX(d.totalSalesToday);
-                    el('stat-today-admin').textContent = 'UGX ' + numberLocale(d.todayAdminSales);
-                    el('stat-today-emp').textContent = 'UGX ' + numberLocale(d.todayEmployeeSales);
+                    el('stat-today').textContent = formatCurrency(d.totalSalesToday);
+                    el('stat-today-admin').textContent = window.businessCurrency + ' ' + numberLocale(d.todayAdminSales);
+                    el('stat-today-emp').textContent = window.businessCurrency + ' ' + numberLocale(d.todayEmployeeSales);
                 }
                 if (el('stat-monthly')) {
-                    el('stat-monthly').textContent = formatUGX(d.totalMonthlySales);
-                    el('stat-monthly-admin').textContent = 'UGX ' + numberLocale(d.monthAdminSales);
-                    el('stat-monthly-emp').textContent = 'UGX ' + numberLocale(d.monthEmployeeSales);
+                    el('stat-monthly').textContent = formatCurrency(d.totalMonthlySales);
+                    el('stat-monthly-admin').textContent = window.businessCurrency + ' ' + numberLocale(d.monthAdminSales);
+                    el('stat-monthly-emp').textContent = window.businessCurrency + ' ' + numberLocale(d.monthEmployeeSales);
                 }
                 if (el('stat-expenses')) {
-                    el('stat-expenses').textContent = formatUGX(d.totalMonthlyExpenses);
-                    el('stat-expenses-admin').textContent = 'UGX ' + numberLocale(d.monthAdminExpenses);
-                    el('stat-expenses-emp').textContent = 'UGX ' + numberLocale(d.monthEmployeeExpenses);
+                    el('stat-expenses').textContent = formatCurrency(d.totalMonthlyExpenses);
+                    el('stat-expenses-admin').textContent = window.businessCurrency + ' ' + numberLocale(d.monthAdminExpenses);
+                    el('stat-expenses-emp').textContent = window.businessCurrency + ' ' + numberLocale(d.monthEmployeeExpenses);
                 }
                 if (el('stat-profit')) {
                     var profit = d.netProfit;
-                    el('stat-profit').textContent = formatUGX(profit);
+                    el('stat-profit').textContent = formatCurrency(profit);
                     el('stat-profit').className = 'stat-value ' + (profit >= 0 ? 'text-green-600' : 'text-red-600');
                 }
             })
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     scales: {
                         x: { ticks: { color: textColor, font: { size: 10 }, maxTicksLimit: 10 }, grid: { color: gridColor } },
-                        y: { ticks: { color: textColor, font: { size: 10 }, callback: function(v) { return formatUGX(v); } }, grid: { color: gridColor } }
+                        y: { ticks: { color: textColor, font: { size: 10 }, callback: function(v) { return formatCurrency(v); } }, grid: { color: gridColor } }
                     }
                 }
             });

@@ -76,9 +76,9 @@
         <ul class="mt-3 space-y-1.5 text-sm">
           <li class="flex justify-between"><span class="text-gray-500">{{ __('Product:') }}</span><span class="font-medium">{{ session('receipt.product') }}</span></li>
           <li class="flex justify-between"><span class="text-gray-500">{{ __('Unit:') }}</span><span class="font-medium">{{ session('receipt.unit') }}</span></li>
-          <li class="flex justify-between"><span class="text-gray-500">{{ __('Price per piece:') }}</span><span class="font-medium">UGX {{ number_format(session('receipt.price')) }}</span></li>
+          <li class="flex justify-between"><span class="text-gray-500">{{ __('Price per piece:') }}</span><span class="font-medium">{{ businessCurrency() }} {{ number_format(session('receipt.price')) }}</span></li>
           <li class="flex justify-between"><span class="text-gray-500">{{ __('Quantity Sold (pieces):') }}</span><span class="font-medium">{{ session('receipt.total_pieces') }}</span></li>
-          <li class="flex justify-between"><span class="text-gray-500">{{ __('Total Paid:') }}</span><span class="font-medium text-green-700">UGX {{ number_format(session('receipt.amount')) }}</span></li>
+          <li class="flex justify-between"><span class="text-gray-500">{{ __('Total Paid:') }}</span><span class="font-medium text-green-700">{{ businessCurrency() }} {{ number_format(session('receipt.amount')) }}</span></li>
           <li class="flex justify-between"><span class="text-gray-500">{{ __('Date:') }}</span><span class="font-medium">{{ session('receipt.date') }}</span></li>
           <li class="flex justify-between"><span class="text-gray-500">{{ __('Processed by:') }}</span><span class="font-medium">{{ auth()->user()->name }}</span></li>
         </ul>
@@ -167,7 +167,7 @@
             <svg class="w-3.5 h-3.5 inline mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            {{ __('Price per Piece (UGX)') }}
+            {{ currency_label('Price per Piece (UGX)') }}
           </label>
           <input type="text" id="price_display" class="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2.5 text-sm text-gray-700" readonly placeholder="{{ __('Choose product') }}">
           <input type="hidden" id="price_value" name="price_value">
@@ -213,7 +213,7 @@
             <svg class="w-3.5 h-3.5 inline mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
-            {{ __('Amount Paid (UGX)') }}
+            {{ currency_label('Amount Paid (UGX)') }}
           </label>
           <input type="text" id="amount_display" name="amount_display" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" required oninput="formatAmountInput(this)">
           <input type="hidden" id="amount_sold" name="amount_sold">
@@ -225,7 +225,7 @@
             <svg class="w-3.5 h-3.5 inline mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
             </svg>
-            {{ __('Minimum Expected (UGX)') }}
+            {{ currency_label('Minimum Expected (UGX)') }}
           </label>
           <input type="text" id="suggested_total" class="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2.5 text-sm text-green-700 font-medium" readonly>
         </div>
@@ -283,9 +283,9 @@
   let selectedStock = 0;
   let unitsPerCarton = 24;
 
-  function formatUGX(amount) {
+  function formatCurrency(amount) {
     return new Intl.NumberFormat('en-UG', {
-      style: 'currency', currency: 'UGX', minimumFractionDigits: 0
+      minimumFractionDigits: 0, minimumFractionDigits: 0
     }).format(amount);
   }
 
@@ -327,7 +327,7 @@
     function updateStockDisplay() {
       const unit = unitSelect.value;
       stockDisplay.value = selectedStock;
-      priceDisplay.value = selectedPrice ? formatUGX(selectedPrice) : '';
+      priceDisplay.value = selectedPrice ? formatCurrency(selectedPrice) : '';
       priceValueInput.value = selectedPrice;
 
       if (unit === 'dozen' || unit === 'carton') {
@@ -367,7 +367,7 @@
       total = total * (1 - discountPercent / 100);
     }
 
-    suggestedTotal.value = qty ? formatUGX(total) : '';
+    suggestedTotal.value = qty ? formatCurrency(total) : '';
   }
 
   function formatAmountInput(input) {

@@ -26,6 +26,7 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'currency' => 'nullable|string|max:10',
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|min:6|confirmed',
         ]);
@@ -33,6 +34,9 @@ class ProfileController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->username = $request->username;
+        if ($request->filled('currency')) {
+            $user->currency = strtoupper($request->currency);
+        }
 
         if ($request->filled('current_password')) {
             if (!Hash::check($request->current_password, $user->password)) {

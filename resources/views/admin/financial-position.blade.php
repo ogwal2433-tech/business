@@ -26,7 +26,7 @@
                 </div>
                 <div class="fp-stat-body">
                     <p class="fp-stat-label">{{ __('Stock Value') }}</p>
-                    <p class="fp-stat-value text-blue-600">UGX {{ number_format($inventoryValue, 2) }}</p>
+                    <p class="fp-stat-value text-blue-600">{{ businessCurrency() }} {{ number_format($inventoryValue, 2) }}</p>
                     <p class="fp-stat-sub">{{ __('Total value of products you have in stock') }}</p>
                 </div>
             </div>
@@ -36,7 +36,7 @@
                 </div>
                 <div class="fp-stat-body">
                     <p class="fp-stat-label">{{ __('Unpaid Customer Credit') }}</p>
-                    <p class="fp-stat-value text-amber-600">UGX {{ number_format($outstandingCredit, 2) }}</p>
+                    <p class="fp-stat-value text-amber-600">{{ businessCurrency() }} {{ number_format($outstandingCredit, 2) }}</p>
                     <p class="fp-stat-sub">{{ __('Money customers still owe you') }}</p>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                 </div>
                 <div class="fp-stat-body">
                     <p class="fp-stat-label">{{ __("This Month's Cash Flow") }}</p>
-                    <p class="fp-stat-value {{ $netCashFlow >= 0 ? 'text-green-600' : 'text-red-600' }}">UGX {{ number_format($netCashFlow, 2) }}</p>
+                    <p class="fp-stat-value {{ $netCashFlow >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ businessCurrency() }} {{ number_format($netCashFlow, 2) }}</p>
                     <p class="fp-stat-sub">{{ __('Sales this month minus expenses this month') }}</p>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                 </div>
                 <div class="fp-stat-body">
                     <p class="fp-stat-label">{{ __('Estimated Business Worth') }}</p>
-                    <p class="fp-stat-value text-indigo-600">UGX {{ number_format($estNetWorth, 2) }}</p>
+                    <p class="fp-stat-value text-indigo-600">{{ businessCurrency() }} {{ number_format($estNetWorth, 2) }}</p>
                     <p class="fp-stat-sub">{{ __('What you own minus what you have spent') }}</p>
                 </div>
             </div>
@@ -210,19 +210,19 @@
                         {{ __('Stock Value') }}
                         <i class="bi bi-question-circle fp-tip-icon-sm" data-tip="{{ __('Total value of products you currently have in stock') }}"></i>
                     </span>
-                    <span class="fp-balance-amount">UGX {{ number_format($inventoryValue, 2) }}</span>
+                    <span class="fp-balance-amount">{{ businessCurrency() }} {{ number_format($inventoryValue, 2) }}</span>
                 </div>
                 <div class="fp-balance-row">
                     <span class="fp-balance-label">
                         {{ __('Total Sales Ever Made') }}
                         <i class="bi bi-question-circle fp-tip-icon-sm" data-tip="{{ __('All the money your business has ever earned from sales') }}"></i>
                     </span>
-                    <span class="fp-balance-amount">UGX {{ number_format($allTimeSales, 2) }}</span>
+                    <span class="fp-balance-amount">{{ businessCurrency() }} {{ number_format($allTimeSales, 2) }}</span>
                 </div>
                 <div class="fp-balance-row fp-balance-total">
                     <span class="fp-balance-label fw-bold">{{ __('Total Value of What You Own') }}</span>
                     @php $totalAssets = $inventoryValue + $allTimeSales; @endphp
-                    <span class="fp-balance-amount fw-bold">UGX {{ number_format($totalAssets, 2) }}</span>
+                    <span class="fp-balance-amount fw-bold">{{ businessCurrency() }} {{ number_format($totalAssets, 2) }}</span>
                 </div>
             </div>
 
@@ -239,11 +239,11 @@
                         {{ __('Unpaid Customer Credit') }}
                         <i class="bi bi-question-circle fp-tip-icon-sm" data-tip="{{ __('Total amount customers bought on credit but have not paid yet') }}"></i>
                     </span>
-                    <span class="fp-balance-amount">UGX {{ number_format($outstandingCredit, 2) }}</span>
+                    <span class="fp-balance-amount">{{ businessCurrency() }} {{ number_format($outstandingCredit, 2) }}</span>
                 </div>
                 <div class="fp-balance-row fp-balance-total">
                     <span class="fp-balance-label fw-bold">{{ __('Total Money Owed to You') }}</span>
-                    <span class="fp-balance-amount fw-bold">UGX {{ number_format($outstandingCredit, 2) }}</span>
+                    <span class="fp-balance-amount fw-bold">{{ businessCurrency() }} {{ number_format($outstandingCredit, 2) }}</span>
                 </div>
             </div>
 
@@ -260,11 +260,11 @@
                         {{ __('Total Costs Ever Spent') }}
                         <i class="bi bi-question-circle fp-tip-icon-sm" data-tip="{{ __('All the money your business has ever spent on expenses') }}"></i>
                     </span>
-                    <span class="fp-balance-amount">UGX {{ number_format($allTimeExpenses, 2) }}</span>
+                    <span class="fp-balance-amount">{{ businessCurrency() }} {{ number_format($allTimeExpenses, 2) }}</span>
                 </div>
                 <div class="fp-balance-row fp-balance-total">
                     <span class="fp-balance-label fw-bold">{{ __('Estimated Business Value') }}</span>
-                    <span class="fp-balance-amount fw-bold text-indigo-600">UGX {{ number_format($estNetWorth, 2) }}</span>
+                    <span class="fp-balance-amount fw-bold text-indigo-600">{{ businessCurrency() }} {{ number_format($estNetWorth, 2) }}</span>
                 </div>
                 <p class="fp-balance-formula mt-2">{{ __('What You Own minus Total Costs = Your Business Worth') }}</p>
             </div>
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var textColor = isDark ? '#9ca3af' : '#6b7280';
     var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
-    function formatUGX(v) { return 'UGX ' + Number(v).toLocaleString(); }
+    function formatCurrency(v) { return window.businessCurrency + ' ' + Number(v).toLocaleString(); }
 
     // 1. Progress Score Gauge (semi-circle)
     var gaugeCtx = document.getElementById('progressGauge');
@@ -523,14 +523,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 var i = ctx.dataIndex;
                                 var p = nwProfits[i];
                                 var sign = p >= 0 ? '+' : '';
-                                return ctx.parsed.y >= 0 ? 'UGX ' + Number(ctx.parsed.y).toLocaleString() + ' (' + sign + 'UGX ' + Number(p).toLocaleString() + ')' : 'UGX ' + Number(ctx.parsed.y).toLocaleString();
+                                return ctx.parsed.y >= 0 ? window.businessCurrency + ' ' + Number(ctx.parsed.y).toLocaleString() + ' (' + sign + window.businessCurrency + ' ' + Number(p).toLocaleString() + ')' : window.businessCurrency + ' ' + Number(ctx.parsed.y).toLocaleString();
                             }
                         }
                     }
                 },
                 scales: {
                     x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } },
-                    y: { ticks: { color: textColor, font: { size: 10 }, callback: function(v) { return 'UGX ' + Number(v/1000).toFixed(0) + 'k'; } }, grid: { color: gridColor } }
+                    y: { ticks: { color: textColor, font: { size: 10 }, callback: function(v) { return window.businessCurrency + ' ' + Number(v/1000).toFixed(0) + 'k'; } }, grid: { color: gridColor } }
                 }
             }
         });
@@ -565,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cutout: '65%',
                 plugins: {
                     legend: { position: 'bottom', labels: { color: textColor, font: { size: 11 }, padding: 12 } },
-                    tooltip: { callbacks: { label: function(ctx) { return ctx.label.split(' (')[0] + ': UGX ' + Number(ctx.raw).toLocaleString(); } } }
+                    tooltip: { callbacks: { label: function(ctx) { return ctx.label.split(' (')[0] + ': ' + window.businessCurrency + ' ' + Number(ctx.raw).toLocaleString(); } } }
                 }
             }
         });

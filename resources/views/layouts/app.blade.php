@@ -857,7 +857,10 @@
         document.body.classList.add('electron-app');
       });
     }
+    window.businessCurrency = '{{ businessCurrency() }}';
   </script>
+    function formatCurrency(v) { return window.businessCurrency + ' ' + Number(v).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}); }
+
 
 </head>
 
@@ -1566,3 +1569,4 @@
   </script>
 </body>
 </html>
+

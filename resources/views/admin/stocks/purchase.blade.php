@@ -37,7 +37,7 @@
                     <input type="number" name="quantity[]" class="form-control" required>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">{{ __('Price/Unit (UGX)') }}</label>
+                    <label class="form-label">{{ currency_label('Price/Unit (UGX)') }}</label>
                     <input type="number" step="0.01" name="price_per_unit[]" class="form-control" required>
                 </div>
                 <div class="col-md-3">

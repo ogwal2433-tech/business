@@ -281,14 +281,14 @@
 
                   <div class="receipt-row">
                     <span>{{ session('receipt.product') }} × {{ session('receipt.total_pieces') }} {{ __('pcs') }}</span>
-                    <span>UGX {{ number_format(session('receipt.price') * session('receipt.total_pieces')) }}</span>
+                    <span>{{ businessCurrency() }} {{ number_format(session('receipt.price') * session('receipt.total_pieces')) }}</span>
                   </div>
 
                   <div class="receipt-divider"></div>
 
                   <div class="receipt-row total">
                     <span>{{ session('receipt.status') === 'credit' ? __('Deposit Today') : __('Total Paid') }}</span>
-                    <span>UGX {{ number_format(session('receipt.amount')) }}</span>
+                    <span>{{ businessCurrency() }} {{ number_format(session('receipt.amount')) }}</span>
                   </div>
 
                   @if(session('receipt.status') === 'credit' && session('receipt.client_name'))
@@ -299,7 +299,7 @@
                     </div>
                     <div class="receipt-row">
                       <span>{{ __('Balance Due') }}</span>
-                      <span>UGX {{ number_format(session('receipt.balance')) }}</span>
+                      <span>{{ businessCurrency() }} {{ number_format(session('receipt.balance')) }}</span>
                     </div>
                     <div class="text-center">
                       <span class="credit-badge">{{ __('Credit Sale') }}</span>
@@ -383,7 +383,7 @@
 
         {{-- Price display --}}
         <div class="col-md-6">
-          <label class="form-label fw-semibold"><i class="bi bi-cash-stack"></i> {{ __('Price per Piece (UGX)') }}</label>
+          <label class="form-label fw-semibold"><i class="bi bi-cash-stack"></i> {{ currency_label('Price per Piece (UGX)') }}</label>
           <input type="text" id="price_display" class="form-control bg-light" readonly placeholder="{{ __('Choose product') }}">
           <input type="hidden" id="price_value" name="price_value">
         </div>
@@ -433,21 +433,21 @@
 
         {{-- Amount paid --}}
         <div class="col-md-3">
-          <label class="form-label fw-semibold"><i class="bi bi-currency-exchange"></i> <span id="amountLabel">{{ __('Amount Paid (UGX)') }}</span></label>
+          <label class="form-label fw-semibold"><i class="bi bi-currency-exchange"></i> <span id="amountLabel">{{ currency_label('Amount Paid (UGX)') }}</span></label>
           <input type="text" id="amount_display" name="amount_display" class="form-control" required oninput="formatAmountInput(this)">
           <input type="hidden" id="amount_sold" name="amount_sold">
         </div>
 
         {{-- Suggested total --}}
         <div class="col-md-3">
-          <label class="form-label fw-semibold"><i class="bi bi-calculator"></i> {{ __('Total Price (UGX)') }}</label>
+          <label class="form-label fw-semibold"><i class="bi bi-calculator"></i> {{ currency_label('Total Price (UGX)') }}</label>
           <input type="text" id="suggested_total" class="form-control bg-light text-success" readonly>
           <input type="hidden" id="full_total_value" name="full_total" value="0">
         </div>
 
         {{-- Balance Left (credit only) --}}
         <div class="col-md-3" id="balanceField" style="display:none;">
-          <label class="form-label fw-semibold"><i class="bi bi-pie-chart"></i> {{ __('Balance Left (UGX)') }}</label>
+          <label class="form-label fw-semibold"><i class="bi bi-pie-chart"></i> {{ currency_label('Balance Left (UGX)') }}</label>
           <input type="text" id="balance_left_display" class="form-control bg-light text-danger fw-bold" readonly>
           <input type="hidden" id="balance_left_value" name="balance_left" value="0">
         </div>
@@ -515,9 +515,9 @@
   let selectedStock = 0;
   let unitsPerCarton = 24;
 
-  function formatUGX(amount) {
+  function formatCurrency(amount) {
     return new Intl.NumberFormat('en-UG', {
-      style: 'currency', currency: 'UGX', minimumFractionDigits: 0
+      minimumFractionDigits: 0, minimumFractionDigits: 0
     }).format(amount);
   }
 
@@ -567,7 +567,7 @@
     function updateStockDisplay() {
       const unit = unitSelect.value;
       stockDisplay.value = selectedStock;
-      priceDisplay.value = selectedPrice ? formatUGX(selectedPrice) : '';
+      priceDisplay.value = selectedPrice ? formatCurrency(selectedPrice) : '';
       priceValueInput.value = selectedPrice;
 
       if (unit === 'dozen' || unit === 'carton') {
@@ -609,7 +609,7 @@
       total = total * (1 - discountPercent / 100);
     }
 
-    suggestedTotal.value = qty ? formatUGX(total) : '';
+    suggestedTotal.value = qty ? formatCurrency(total) : '';
     document.getElementById('full_total_value').value = total;
     updateBalanceLeft();
   }
@@ -618,7 +618,7 @@
     const total = parseFloat((suggestedTotal.value || '').replace(/[^0-9.]/g, '')) || 0;
     const paid = parseFloat(amountSoldInput.value) || 0;
     const balance = Math.max(0, total - paid);
-    balanceLeftDisplay.value = balance > 0 ? formatUGX(balance) : formatUGX(0);
+    balanceLeftDisplay.value = balance > 0 ? formatCurrency(balance) : formatCurrency(0);
     balanceLeftValue.value = balance;
   }
 
@@ -732,7 +732,7 @@
       creditHint.style.display = 'inline';
       clientNameField.style.display = 'block';
       balanceField.style.display = 'block';
-      amountLabel.textContent = '{{ __("Deposit Paid (UGX)") }}';
+amountLabel.textContent = '{{ currency_label("Deposit Paid (UGX)") }}';
       confirmMsg.style.display = 'none';
       creditConfirmMsg.style.display = 'block';
     } else {
@@ -742,7 +742,7 @@
       creditHint.style.display = 'none';
       clientNameField.style.display = 'none';
       balanceField.style.display = 'none';
-      amountLabel.textContent = '{{ __("Amount Paid (UGX)") }}';
+      amountLabel.textContent = '{{ currency_label("Amount Paid (UGX)") }}';
       confirmMsg.style.display = 'block';
       creditConfirmMsg.style.display = 'none';
     }

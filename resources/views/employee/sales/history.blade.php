@@ -131,13 +131,13 @@
                 {{ ucfirst($sale->product->unit ?? 'piece') }}
               </span>
             </td>
-            <td class="px-4 py-3 text-right text-gray-600">UGX {{ number_format($sale->product->price) }}</td>
+            <td class="px-4 py-3 text-right text-gray-600">{{ businessCurrency() }} {{ number_format($sale->product->price) }}</td>
             <td class="px-4 py-3 text-center">
               <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
                 {{ $sale->quantity }}
               </span>
             </td>
-            <td class="px-4 py-3 text-right font-semibold text-gray-900">UGX {{ number_format($sale->total_amount) }}</td>
+            <td class="px-4 py-3 text-right font-semibold text-gray-900">{{ businessCurrency() }} {{ number_format($sale->total_amount) }}</td>
             <td class="px-4 py-3">
               <div class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +165,7 @@
         </div>
         <div>
           <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('Total Revenue') }}</span>
-          <div class="text-xl font-bold text-blue-800">UGX {{ number_format($totalSales) }}</div>
+          <div class="text-xl font-bold text-blue-800">{{ businessCurrency() }} {{ number_format($totalSales) }}</div>
           <span class="text-xs text-gray-500">{{ $sales->total() }} {{ __('transactions') }}</span>
         </div>
       </div>

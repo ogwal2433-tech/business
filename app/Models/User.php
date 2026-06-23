@@ -21,6 +21,7 @@ class User extends Authenticatable
         'role',
         'status',
         'admin_id',
+        'currency',
     ];
 
     public function sales()
@@ -46,6 +47,19 @@ class User extends Authenticatable
     public function employees()
     {
         return $this->hasMany(User::class, 'admin_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function getCurrencyAttribute($value)
+    {
+        if ($this->isEmployee()) {
+            return optional($this->admin)->getRawOriginal('currency') ?: 'UGX';
+        }
+        return $value ?: 'UGX';
     }
 
     public function subscription()

@@ -28,15 +28,15 @@
         @endphp
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Total Sales (6mo)') }}</p>
-            <p class="text-xl font-bold text-blue-600 mt-1" id="a-total-sales">UGX {{ number_format($totalSales, 2) }}</p>
+            <p class="text-xl font-bold text-blue-600 mt-1" id="a-total-sales">{{ businessCurrency() }} {{ number_format($totalSales, 2) }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Total Expenses (6mo)') }}</p>
-            <p class="text-xl font-bold text-red-600 mt-1" id="a-total-expenses">UGX {{ number_format($totalExp, 2) }}</p>
+            <p class="text-xl font-bold text-red-600 mt-1" id="a-total-expenses">{{ businessCurrency() }} {{ number_format($totalExp, 2) }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Net Profit (6mo)') }}</p>
-            <p class="text-xl font-bold {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }} mt-1" id="a-net-profit">UGX {{ number_format($netProfit, 2) }}</p>
+            <p class="text-xl font-bold {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }} mt-1" id="a-net-profit">{{ businessCurrency() }} {{ number_format($netProfit, 2) }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Top Products') }}</p>
@@ -92,7 +92,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td class="px-5 py-3">{{ $sale->product?->name ?? __('Unknown') }}</td>
                             <td class="px-5 py-3 text-right font-medium">{{ number_format($sale->total_qty) }}</td>
-                            <td class="px-5 py-3 text-right font-medium">UGX {{ number_format($sale->total_revenue, 2) }}</td>
+                            <td class="px-5 py-3 text-right font-medium">{{ businessCurrency() }} {{ number_format($sale->total_revenue, 2) }}</td>
                         </tr>
                         @empty
                         <tr><td colspan="3" class="px-5 py-8 text-center text-gray-400">{{ __('No sales data yet') }}</td></tr>
@@ -120,7 +120,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td class="px-5 py-3">{{ $s->employee?->name ?? __('Unknown') }}</td>
                             <td class="px-5 py-3 text-right font-medium">{{ $s->count }}</td>
-                            <td class="px-5 py-3 text-right font-medium">UGX {{ number_format($s->total, 2) }}</td>
+                            <td class="px-5 py-3 text-right font-medium">{{ businessCurrency() }} {{ number_format($s->total, 2) }}</td>
                         </tr>
                         @empty
                         <tr><td colspan="3" class="px-5 py-8 text-center text-gray-400">{{ __('No sales data yet') }}</td></tr>
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function num(v) { return v || 0; }
 
-    function formatUGX(v) { return 'UGX ' + Number(v).toLocaleString(); }
+    function formatCurrency(v) { return window.businessCurrency + ' ' + Number(v).toLocaleString(); }
 
     // 1. Daily Sales Trend
     new Chart(document.getElementById('dailySalesChart'), {
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: textColor, font: { size: 10 }, maxTicksLimit: 10 }, grid: { color: gridColor } },
-                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => formatUGX(v) }, grid: { color: gridColor } }
+                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => formatCurrency(v) }, grid: { color: gridColor } }
             }
         }
     });
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
             plugins: { legend: { labels: { color: textColor, font: { size: 11 }, boxWidth: 12 } } },
             scales: {
                 x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => formatUGX(v) }, grid: { color: gridColor } }
+                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => formatCurrency(v) }, grid: { color: gridColor } }
             }
         }
     });
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => formatUGX(v) }, grid: { color: gridColor } }
+                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => formatCurrency(v) }, grid: { color: gridColor } }
             }
         }
     });

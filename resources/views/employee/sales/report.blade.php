@@ -85,7 +85,7 @@
       </h5>
       <div class="flex items-center gap-2">
         <span class="text-white/80 text-sm">Total Revenue:</span>
-        <span class="bg-white text-blue-700 font-bold px-4 py-1.5 rounded-full text-sm">UGX {{ number_format($totalSalesAmount, 0) }}</span>
+        <span class="bg-white text-blue-700 font-bold px-4 py-1.5 rounded-full text-sm">{{ businessCurrency() }} {{ number_format($totalSalesAmount, 0) }}</span>
       </div>
     </div>
 
@@ -122,13 +122,13 @@
                     {{ ucfirst($data['unit']) }}
                   </span>
                 </td>
-                <td class="px-5 py-3 text-right text-gray-600">UGX {{ number_format($data['unit_price'], 0) }}</td>
+                <td class="px-5 py-3 text-right text-gray-600">{{ businessCurrency() }} {{ number_format($data['unit_price'], 0) }}</td>
                 <td class="px-5 py-3 text-center">
                   <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
                     {{ $data['total_quantity'] }}
                   </span>
                 </td>
-                <td class="px-5 py-3 text-right font-bold text-blue-700">UGX {{ number_format($data['total_amount'], 0) }}</td>
+                <td class="px-5 py-3 text-right font-bold text-blue-700">{{ businessCurrency() }} {{ number_format($data['total_amount'], 0) }}</td>
               </tr>
               @endforeach
             </tbody>

@@ -77,7 +77,7 @@
                     </div>
 
                     <div>
-                        <label for="amount" class="expense-label">{{ __('Amount (UGX)') }}</label>
+                        <label for="amount" class="expense-label">{{ currency_label('Amount (UGX)') }}</label>
                         <input type="text" name="amount_display" id="amount_display" value="{{ old('amount') ? number_format((float) old('amount')) : '' }}"
                                required
                                class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('amount') border-red-500 @enderror"

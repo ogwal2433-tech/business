@@ -50,7 +50,7 @@
                 <h3 class="text-sm font-medium text-gray-500">{{ __('Total Revenue') }}</h3>
                 <div class="p-2 bg-blue-100 rounded-lg"><i class="fas fa-money-bill-wave text-blue-600"></i></div>
             </div>
-            <p class="text-3xl font-bold text-gray-900" id="sa-total-revenue">UGX {{ number_format($totalRevenue) }}</p>
+            <p class="text-3xl font-bold text-gray-900" id="sa-total-revenue">{{ businessCurrency() }} {{ number_format($totalRevenue) }}</p>
         </div>
     </div>
 
@@ -73,7 +73,7 @@
                                 @endif
                             </div>
                             <p class="text-2xl font-bold text-blue-600 mb-2">
-                                UGX {{ number_format($plan->price) }} <span class="text-sm font-normal text-gray-500">/{{ $plan->duration_days }} {{ __('days') }}</span>
+                                {{ businessCurrency() }} {{ number_format($plan->price) }} <span class="text-sm font-normal text-gray-500">/{{ $plan->duration_days }} {{ __('days') }}</span>
                             </p>
                             <p class="text-sm text-gray-600 mb-1">{{ __('Max Employees') }}: {{ $plan->max_employees > 0 ? $plan->max_employees : __('Unlimited') }}</p>
                             <p class="text-xs text-gray-500">{{ $plan->description }}</p>
@@ -106,7 +106,7 @@
                                 <p class="text-xs text-gray-500">{{ $payment->subscription?->plan?->name ?? 'N/A' }}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-bold text-blue-600">UGX {{ number_format($payment->amount) }}</p>
+                                <p class="text-sm font-bold text-blue-600">{{ businessCurrency() }} {{ number_format($payment->amount) }}</p>
                                 <p class="text-xs text-gray-500">{{ $payment->payment_date?->format('d M Y') }}</p>
                             </div>
                         </div>
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (el('sa-total-employees')) el('sa-total-employees').textContent = numberLocale(d.totalEmployees);
                 if (el('sa-active-subs')) el('sa-active-subs').textContent = numberLocale(d.activeSubscriptions);
                 if (el('sa-pending-subs')) el('sa-pending-subs').textContent = numberLocale(d.pendingSubscriptions);
-                if (el('sa-total-revenue')) el('sa-total-revenue').textContent = 'UGX ' + numberLocale(d.totalRevenue);
+                if (el('sa-total-revenue')) el('sa-total-revenue').textContent = window.businessCurrency + ' ' + numberLocale(d.totalRevenue);
             })
             .catch(function() {});
     }

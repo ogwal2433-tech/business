@@ -49,7 +49,7 @@
         </div>
 
         <div class="col-md-6">
-          <label for="amount_display" class="form-label fw-semibold text-primary">{{ __('Amount (UGX)') }}</label>
+          <label for="amount_display" class="form-label fw-semibold text-primary">{{ currency_label('Amount (UGX)') }}</label>
           <input type="text" id="amount_display" class="form-control @error('amount') is-invalid @enderror" value="{{ old('amount') ? number_format((float) old('amount')) : '' }}" required oninput="formatAmountComma(this)" onkeypress="return allowDigitsAndBackspace(event)">
           <input type="hidden" name="amount" id="amount" value="{{ old('amount') }}">
           @error('amount')

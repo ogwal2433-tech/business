@@ -503,7 +503,7 @@
                             @endif
 
                             <div class="plan-price">
-                                <span class="amount">UGX {{ number_format($plan->price) }}</span>
+                                <span class="amount">{{ businessCurrency() }} {{ number_format($plan->price) }}</span>
                                 <span class="period"> / {{ $plan->duration_days }} {{ __('days') }}</span>
                             </div>
 

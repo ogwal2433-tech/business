@@ -585,7 +585,7 @@ public function recordRepayment(Request $request)
 
         $remaining = $sale->total_amount - $sale->amount_paid;
         if ($amount > $remaining) {
-            return back()->with('error', __('Repayment amount exceeds remaining balance of UGX :balance.', ['balance' => number_format($remaining)]));
+            return back()->with('error', currency_label('Repayment amount exceeds remaining balance of UGX :balance.', ['balance' => number_format($remaining)]));
         }
 
         Repayment::create([
@@ -603,7 +603,7 @@ public function recordRepayment(Request $request)
         }
 
         DB::commit();
-        return redirect()->back()->with('success', __('Repayment of UGX :amount recorded successfully.', ['amount' => number_format($amount)]));
+        return redirect()->back()->with('success', currency_label('Repayment of UGX :amount recorded successfully.', ['amount' => number_format($amount)]));
     } catch (\Exception $e) {
         DB::rollBack();
         return back()->with('error', 'Repayment failed: ' . $e->getMessage());

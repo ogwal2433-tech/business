@@ -199,7 +199,7 @@
     return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[unit] || colors.piece}">${unit.charAt(0).toUpperCase() + unit.slice(1)}</span>`;
   };
 
-  const fmt = (v) => v ? 'UGX ' + new Intl.NumberFormat().format(v) : '—';
+  const fmt = (v) => v ? window.businessCurrency + ' ' + new Intl.NumberFormat().format(v) : '—';
 
   searchInput.addEventListener('input', function () {
     clearTimeout(searchTimeout);
@@ -230,7 +230,7 @@
             <span class="text-gray-800">${highlightedName}</span>
             <div class="flex items-center gap-2">
               ${unitBadge(product.unit || 'piece')}
-              <span class="text-blue-700 font-semibold">UGX ${new Intl.NumberFormat().format(product.price)}</span>
+              <span class="text-blue-700 font-semibold">${window.businessCurrency} ${new Intl.NumberFormat().format(product.price)}</span>
             </div>
           `;
 

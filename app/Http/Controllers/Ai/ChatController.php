@@ -38,7 +38,7 @@ class ChatController extends Controller
         $context = $this->buildContext($user);
         $toolDefs = $this->getToolDefinitions();
 
-        $systemPrompt = $groq->buildSystemPrompt($context);
+        $systemPrompt = $groq->buildSystemPrompt($context, businessCurrency());
         $systemPrompt .= "\n\nYou have access to these functions. When you need data, output a function call on its own line like this:\n<function=function_name={\"arg\":\"value\"}</function>\n\nAvailable functions:\n" . $toolDefs;
 
         $messages = [
@@ -174,13 +174,13 @@ class ChatController extends Controller
 
         return sprintf(
             "Business Summary as of %s:\n"
-            . "- Today Sales: UGX %s (%d transactions)\n"
-            . "- This Month Sales: UGX %s (%d transactions)\n"
-            . "- All-Time Sales: UGX %s (%d transactions)\n"
+            .             "- Today Sales: " . businessCurrency() . " %s (%d transactions)\n"
+            . "- This Month Sales: " . businessCurrency() . " %s (%d transactions)\n"
+            . "- All-Time Sales: " . businessCurrency() . " %s (%d transactions)\n"
             . "- Products: %d total (%d low stock, %d out of stock)\n"
             . "- Employees: %d total (%d active)\n"
-            . "- This Month Expenses: UGX %s (employee + operational)\n"
-            . "- Outstanding Credit: UGX %s",
+            . "- This Month Expenses: " . businessCurrency() . " %s (employee + operational)\n"
+            . "- Outstanding Credit: " . businessCurrency() . " %s",
             now()->format('d M Y'),
             number_format($todaySales->sum('total_amount')), $todaySales->count(),
             number_format($monthSales->sum('total_amount')), $monthSales->count(),
@@ -220,19 +220,19 @@ class ChatController extends Controller
         }
 
         $lines = $sales->map(fn($s) => sprintf(
-            '%s | %s | Qty: %d | UGX %s | By: %s%s',
+            '%s | %s | Qty: %d | ' . businessCurrency() . ' %s | By: %s%s',
             $s->created_at->format('d M Y H:i'),
             $s->product?->name ?? 'Unknown',
             $s->quantity,
             number_format($s->total_amount),
             $s->employee?->name ?? 'Admin',
-            $s->amount_paid < $s->total_amount ? ' (Credit: UGX ' . number_format($s->total_amount - $s->amount_paid) . ' remaining)' : ''
+            $s->amount_paid < $s->total_amount ? ' (Credit: ' . businessCurrency() . ' ' . number_format($s->total_amount - $s->amount_paid) . ' remaining)' : ''
         ));
 
         $lines->prepend('Date | Product | Qty | Amount | Sold By');
         $lines->prepend('---');
         $lines->push('---');
-        $lines->push('Total: UGX ' . number_format($sales->sum('total_amount')) . ' (' . $sales->count() . ' records)');
+        $lines->push('Total: ' . businessCurrency() . ' ' . number_format($sales->sum('total_amount')) . ' (' . $sales->count() . ' records)');
 
         return $lines->implode("\n");
     }
@@ -272,7 +272,7 @@ class ChatController extends Controller
         }
 
         $lines = $products->map(fn($p) => sprintf(
-            '%s | Stock: %d %s | Buy: UGX %s | Sell: UGX %s%s',
+            '%s | Stock: %d %s | Buy: ' . businessCurrency() . ' %s | Sell: ' . businessCurrency() . ' %s%s',
             $p->name,
             $p->quantity,
             $p->unit ?? 'pcs',
@@ -314,7 +314,7 @@ class ChatController extends Controller
                 ->first();
 
             return sprintf(
-                '%s | Status: %s | Email: %s | This Month: UGX %s (%d sales)',
+                '%s | Status: %s | Email: %s | This Month: ' . businessCurrency() . ' %s (%d sales)',
                 $emp->name,
                 $emp->status,
                 $emp->email ?? 'N/A',
@@ -355,7 +355,7 @@ class ChatController extends Controller
         }
 
         $lines = $expenses->map(fn($e) => sprintf(
-            '%s | %s | UGX %s | %s | By: %s',
+            '%s | %s | ' . businessCurrency() . ' %s | %s | By: %s',
             $e->date,
             $e->title,
             number_format($e->amount),
@@ -366,7 +366,7 @@ class ChatController extends Controller
         $lines->prepend('Date | Title | Amount | Category | Employee');
         $lines->prepend('---');
         $lines->push('---');
-        $lines->push('Total: UGX ' . number_format($expenses->sum('amount')) . ' (' . $expenses->count() . ' records)');
+        $lines->push('Total: ' . businessCurrency() . ' ' . number_format($expenses->sum('amount')) . ' (' . $expenses->count() . ' records)');
 
         return $lines->implode("\n");
     }
@@ -393,7 +393,7 @@ class ChatController extends Controller
         }
 
         $lines = $expenses->map(fn($e) => sprintf(
-            '%s | %s | UGX %s | %s',
+            '%s | %s | ' . businessCurrency() . ' %s | %s',
             $e->date,
             $e->title,
             number_format($e->amount),
@@ -403,7 +403,7 @@ class ChatController extends Controller
         $lines->prepend('Date | Title | Amount | Category');
         $lines->prepend('---');
         $lines->push('---');
-        $lines->push('Total: UGX ' . number_format($expenses->sum('amount')) . ' (' . $expenses->count() . ' records)');
+        $lines->push('Total: ' . businessCurrency() . ' ' . number_format($expenses->sum('amount')) . ' (' . $expenses->count() . ' records)');
 
         return $lines->implode("\n");
     }

@@ -26,7 +26,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p class="text-2xl font-bold text-gray-900">{{ $subscription->plan->name }}</p>
-                        <p class="text-sm text-gray-500 mt-1">UGX {{ number_format($subscription->plan->price) }} / {{ $subscription->plan->duration_days }} {{ __('days') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ businessCurrency() }} {{ number_format($subscription->plan->price) }} / {{ $subscription->plan->duration_days }} {{ __('days') }}</p>
                     </div>
                     <div class="mt-3 sm:mt-0">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
@@ -166,7 +166,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 border-b border-gray-100">
             <div class="px-6 py-4 text-center">
                 <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">{{ __('Total Paid') }}</p>
-                <p class="text-xl font-bold text-gray-900 mt-1">UGX {{ number_format($totalPaid) }}</p>
+                <p class="text-xl font-bold text-gray-900 mt-1">{{ businessCurrency() }} {{ number_format($totalPaid) }}</p>
             </div>
             <div class="px-6 py-4 text-center">
                 <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">{{ __('Transactions') }}</p>
@@ -198,7 +198,7 @@
                 </div>
                 <!-- Amount + Status -->
                 <div class="text-right flex-shrink-0">
-                    <p class="text-base font-bold {{ $payment->status === 'paid' ? 'text-green-600' : 'text-yellow-600' }}">UGX {{ number_format($payment->amount) }}</p>
+                    <p class="text-base font-bold {{ $payment->status === 'paid' ? 'text-green-600' : 'text-yellow-600' }}">{{ businessCurrency() }} {{ number_format($payment->amount) }}</p>
                     <span class="inline-flex items-center gap-1 text-xs font-medium {{ $payment->status === 'paid' ? 'text-green-600' : 'text-yellow-600' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ $payment->status === 'paid' ? 'bg-green-500' : 'bg-yellow-500' }}"></span>
                         {{ ucfirst($payment->status) }}

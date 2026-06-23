@@ -78,7 +78,7 @@
         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('Total Sales') }}</span>
         <div class="p-2 bg-blue-100 rounded-lg"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
       </div>
-      <p class="text-2xl font-bold text-blue-700">UGX {{ number_format($totalSalesAmount) }}</p>
+      <p class="text-2xl font-bold text-blue-700">{{ businessCurrency() }} {{ number_format($totalSalesAmount) }}</p>
       <p class="text-xs text-gray-500 mt-1">{{ $totalQuantity }} {{ __('items sold') }}</p>
     </a>
     <a href="{{ route('sales.report', array_merge(request()->all(), ['type' => request('type') === 'admin' ? '' : 'admin'])) }}" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-100 p-5 shadow-sm hover:shadow-md transition-shadow block {{ request('type') == 'admin' ? 'ring-2 ring-green-400' : '' }}">
@@ -86,7 +86,7 @@
         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('Admin Sales') }}</span>
         <div class="p-2 bg-green-100 rounded-lg"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>
       </div>
-      <p class="text-2xl font-bold text-green-700">UGX {{ number_format($adminTotalAmount) }}</p>
+      <p class="text-2xl font-bold text-green-700">{{ businessCurrency() }} {{ number_format($adminTotalAmount) }}</p>
       <p class="text-xs text-gray-500 mt-1">{{ $adminSales->count() }} {{ __('transactions') }}</p>
     </a>
     <a href="{{ route('sales.report', array_merge(request()->all(), ['type' => request('type') === 'employee' ? '' : 'employee'])) }}" class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100 p-5 shadow-sm hover:shadow-md transition-shadow block {{ request('type') == 'employee' ? 'ring-2 ring-purple-400' : '' }}">
@@ -94,7 +94,7 @@
         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('Employee Sales') }}</span>
         <div class="p-2 bg-purple-100 rounded-lg"><svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
       </div>
-      <p class="text-2xl font-bold text-purple-700">UGX {{ number_format($employeeTotalAmount) }}</p>
+      <p class="text-2xl font-bold text-purple-700">{{ businessCurrency() }} {{ number_format($employeeTotalAmount) }}</p>
       <p class="text-xs text-gray-500 mt-1">{{ $employeeSales->count() }} {{ __('transactions') }}</p>
     </a>
   </div>
@@ -104,7 +104,7 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-800">{{ __('Admin Sales') }}</h3>
-      <span class="text-xs text-gray-500">UGX {{ number_format($adminTotalAmount) }}</span>
+      <span class="text-xs text-gray-500">{{ businessCurrency() }} {{ number_format($adminTotalAmount) }}</span>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full">
@@ -122,7 +122,7 @@
             <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{{ $sale->created_at->format('d M Y H:i') }}</td>
             <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $sale->product->name ?? 'N/A' }}</td>
             <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ $sale->quantity }}</td>
-            <td class="px-4 py-3 text-sm text-green-600 font-semibold text-right">UGX {{ number_format($sale->total_amount) }}</td>
+            <td class="px-4 py-3 text-sm text-green-600 font-semibold text-right">{{ businessCurrency() }} {{ number_format($sale->total_amount) }}</td>
           </tr>
           @endforeach
         </tbody>
@@ -136,7 +136,7 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-800">{{ __('Employee Sales') }}</h3>
-      <span class="text-xs text-gray-500">UGX {{ number_format($employeeTotalAmount) }}</span>
+      <span class="text-xs text-gray-500">{{ businessCurrency() }} {{ number_format($employeeTotalAmount) }}</span>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full">
@@ -156,7 +156,7 @@
             <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $sale->product->name ?? 'N/A' }}</td>
             <td class="px-4 py-3 text-sm text-gray-900">{{ $sale->employee->name ?? 'N/A' }}</td>
             <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ $sale->quantity }}</td>
-            <td class="px-4 py-3 text-sm text-green-600 font-semibold text-right">UGX {{ number_format($sale->total_amount) }}</td>
+            <td class="px-4 py-3 text-sm text-green-600 font-semibold text-right">{{ businessCurrency() }} {{ number_format($sale->total_amount) }}</td>
           </tr>
           @endforeach
         </tbody>
@@ -164,7 +164,7 @@
           <tr>
             <td colspan="3" class="px-4 py-3 text-sm text-gray-700 text-right">{{ __('Totals:') }}</td>
             <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ $employeeSales->sum('quantity') }}</td>
-            <td class="px-4 py-3 text-sm text-green-700 text-right">UGX {{ number_format($employeeTotalAmount) }}</td>
+            <td class="px-4 py-3 text-sm text-green-700 text-right">{{ businessCurrency() }} {{ number_format($employeeTotalAmount) }}</td>
           </tr>
         </tfoot>
       </table>
@@ -189,7 +189,7 @@
             <span class="font-semibold text-gray-800">{{ $empName }}</span>
           </div>
           <div class="text-right">
-            <span class="text-sm font-semibold text-blue-700">UGX {{ number_format($data['total_sales']) }}</span>
+            <span class="text-sm font-semibold text-blue-700">{{ businessCurrency() }} {{ number_format($data['total_sales']) }}</span>
             <span class="text-xs text-gray-500 ml-2">({{ $data['total_quantity'] }} {{ __('items') }})</span>
           </div>
         </div>
@@ -206,9 +206,9 @@
             @foreach($data['products'] as $prodName => $prodData)
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-2 text-sm text-gray-800">{{ $prodName }}</td>
-              <td class="px-4 py-2 text-sm text-gray-600 text-right">UGX {{ number_format($prodData['price']) }}</td>
+              <td class="px-4 py-2 text-sm text-gray-600 text-right">{{ businessCurrency() }} {{ number_format($prodData['price']) }}</td>
               <td class="px-4 py-2 text-sm text-gray-900 text-right">{{ $prodData['quantity_sold'] }}</td>
-              <td class="px-4 py-2 text-sm text-green-600 font-medium text-right">UGX {{ number_format($prodData['total_sales']) }}</td>
+              <td class="px-4 py-2 text-sm text-green-600 font-medium text-right">{{ businessCurrency() }} {{ number_format($prodData['total_sales']) }}</td>
             </tr>
             @endforeach
           </tbody>
@@ -237,7 +237,7 @@
           </div>
           <div class="text-right ml-4">
             <span class="text-sm font-semibold text-gray-900">{{ $data['quantity_sold'] }} {{ __('sold') }}</span>
-            <span class="text-xs text-gray-500 block">UGX {{ number_format($data['total_sales']) }}</span>
+            <span class="text-xs text-gray-500 block">{{ businessCurrency() }} {{ number_format($data['total_sales']) }}</span>
           </div>
         </div>
         @endforeach

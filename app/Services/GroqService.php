@@ -111,14 +111,14 @@ class GroqService
         }
     }
 
-    public function buildSystemPrompt(array $context): string
+    public function buildSystemPrompt(array $context, string $currency = 'UGX'): string
     {
         $base = "You are an intelligent business assistant for SmartBiz — a small business management system. "
               . "You have access to ALL business data through function calls. When the user asks a question, "
               . "use the available functions to retrieve the exact data needed. "
               . "Call functions one at a time — get the data you need, then answer the user. "
               . "If you need more data after the first call, make another function call. "
-              . "When discussing money, always mention amounts in UGX. "
+              . "When discussing money, always mention amounts in {$currency}. "
               . "Respond in the same language the user used to ask the question.\n\n"
               . "To call a function, output it on its own line like this:\n"
               . "<function=function_name={\"arg\":\"value\"}</function>\n"

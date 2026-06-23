@@ -62,7 +62,7 @@
                 @if($business->subscription && $business->subscription->plan)
                     <div class="text-center">
                         <p class="text-2xl font-bold text-gray-900">{{ $business->subscription->plan->name }}</p>
-                        <p class="text-sm text-gray-500 mt-1">UGX {{ number_format($business->subscription->plan->price) }} / {{ $business->subscription->plan->duration_days }} {{ __('days') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ businessCurrency() }} {{ number_format($business->subscription->plan->price) }} / {{ $business->subscription->plan->duration_days }} {{ __('days') }}</p>
                         <div class="mt-3">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                                 {{ $business->subscription->status === 'active' ? 'bg-green-100 text-green-800' : '' }}
@@ -177,7 +177,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($payments as $payment)
                         <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 text-sm font-bold text-blue-600">UGX {{ number_format($payment->amount) }}</td>
+                            <td class="px-6 py-4 text-sm font-bold text-blue-600">{{ businessCurrency() }} {{ number_format($payment->amount) }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ $payment->payment_date?->format('d M Y H:i') ?? $payment->created_at->format('d M Y H:i') }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ $payment->payment_method ?? '-' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 font-mono">{{ $payment->reference ?? '-' }}</td>
@@ -208,7 +208,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Plan') }}</label>
                 <select name="plan_id" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500">
                     @foreach($plans ?? \App\Models\SubscriptionPlan::where('is_active', true)->get() as $plan)
-                        <option value="{{ $plan->id }}">{{ $plan->name }} (UGX {{ number_format($plan->price) }} / {{ $plan->duration_days }}d)</option>
+                        <option value="{{ $plan->id }}">{{ $plan->name }} ({{ businessCurrency() }} {{ number_format($plan->price) }} / {{ $plan->duration_days }}d)</option>
                     @endforeach
                 </select>
             </div>

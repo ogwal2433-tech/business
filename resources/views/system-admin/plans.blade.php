@@ -30,7 +30,7 @@
                             <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{{ __('Inactive') }}</span>
                         @endif
                     </div>
-                    <p class="text-3xl font-bold text-blue-600 mb-1">UGX {{ number_format($plan->price) }}</p>
+                    <p class="text-3xl font-bold text-blue-600 mb-1">{{ businessCurrency() }} {{ number_format($plan->price) }}</p>
                     <p class="text-sm text-gray-500 mb-4">/ {{ $plan->duration_days }} {{ __('days') }}</p>
 
                     <div class="space-y-2 text-sm">

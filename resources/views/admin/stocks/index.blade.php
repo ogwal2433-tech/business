@@ -44,8 +44,8 @@
                                 <tr>
                                     <td>{{ $purchase->product_name }}</td>
                                     <td>{{ $purchase->quantity }}</td>
-                                    <td><span class="text-success">UGX {{ number_format($purchase->price_per_unit) }}</span></td>
-                                    <td><strong class="text-primary">UGX {{ number_format($purchase->quantity * $purchase->price_per_unit) }}</strong></td>
+                                    <td><span class="text-success">{{ businessCurrency() }} {{ number_format($purchase->price_per_unit) }}</span></td>
+                                    <td><strong class="text-primary">{{ businessCurrency() }} {{ number_format($purchase->quantity * $purchase->price_per_unit) }}</strong></td>
                                     <td>{{ $purchase->notes ?: '—' }}</td>
                                 </tr>
                             @endforeach
@@ -59,7 +59,7 @@
         <div class="text-end mt-4">
             <h5 class="text-success fw-bold">
                 <i class="bi bi-cash-coin me-1"></i>
-                {{ __('Total Spent') }}: <span class="text-dark">UGX {{ number_format($overallTotal) }}</span>
+                {{ __('Total Spent') }}: <span class="text-dark">{{ businessCurrency() }} {{ number_format($overallTotal) }}</span>
             </h5>
         </div>
     @endif

@@ -44,8 +44,8 @@
                                 <th>{{ __('Client') }}</th>
                                 <th>{{ __('Product') }}</th>
                                 <th>{{ __('Qty') }}</th>
-                                <th>{{ __('Amount Paid (UGX)') }}</th>
-                                <th>{{ __('Pending Balance (UGX)') }}</th>
+<th>{{ currency_label('Amount Paid (UGX)') }}</th>
+                                <th>{{ currency_label('Pending Balance (UGX)') }}</th>
                                 <th>{{ __('Next Installment') }}</th>
                                 <th>{{ __('Status') }}</th>
                                 <th>{{ __('Actions') }}</th>
@@ -58,8 +58,8 @@
                                 <td>{{ ucwords($sale->client_name ?? 'N/A') }}</td>
                                 <td>{{ $sale->product->name ?? 'N/A' }}</td>
                                 <td>{{ number_format($sale->quantity) }}</td>
-                                <td class="cs-paid">UGX {{ number_format($sale->amount_paid, 0, '.', ',') }}</td>
-                                <td class="cs-balance">UGX {{ number_format($sale->total_amount - $sale->amount_paid, 0, '.', ',') }}</td>
+                                <td class="cs-paid">{{ businessCurrency() }} {{ number_format($sale->amount_paid, 0, '.', ',') }}</td>
+                                <td class="cs-balance">{{ businessCurrency() }} {{ number_format($sale->total_amount - $sale->amount_paid, 0, '.', ',') }}</td>
                                 <td>
                                     @php
                                         $latestRepayment = $sale->repayments()->latest()->first();
@@ -102,7 +102,7 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th>{{ __('Date') }}</th>
-                                                                    <th>{{ __('Amount (UGX)') }}</th>
+                                                                    <th>{{ currency_label('Amount (UGX)') }}</th>
                                                                     <th>{{ __('Next Installment') }}</th>
                                                                     <th>{{ __('Note') }}</th>
                                                                 </tr>
@@ -111,7 +111,7 @@
                                                                 @foreach($repayments as $repayment)
                                                                 <tr>
                                                                     <td>{{ \Carbon\Carbon::parse($repayment->created_at)->format('d M Y') }}</td>
-                                                                    <td>UGX {{ number_format($repayment->amount, 0, '.', ',') }}</td>
+                                                                    <td>{{ businessCurrency() }} {{ number_format($repayment->amount, 0, '.', ',') }}</td>
                                                                     <td>{{ $repayment->next_installment_date ? \Carbon\Carbon::parse($repayment->next_installment_date)->format('d M Y') : 'N/A' }}</td>
                                                                     <td>{{ $repayment->note ?? '-' }}</td>
                                                                 </tr>
@@ -148,10 +148,10 @@
 
                                                         <div class="modal-body">
                                                             <div class="mb-3">
-                                                                <label class="form-label">{{ __('Repayment Amount (UGX)') }}</label>
+                                                                <label class="form-label">{{ currency_label('Repayment Amount (UGX)') }}</label>
                                                                 <div class="d-flex align-items-center gap-2 mb-1">
                                                                     <input type="text" name="amount" class="form-control" inputmode="numeric" required placeholder="{{ __('Enter amount') }}">
-                                                                    <span class="text-muted small">{{ __('Balance:') }} UGX {{ number_format($sale->total_amount - $sale->amount_paid) }}</span>
+                                                                    <span class="text-muted small">{{ __('Balance:') }} {{ businessCurrency() }} {{ number_format($sale->total_amount - $sale->amount_paid) }}</span>
                                                                 </div>
                                                             </div>
                                                             <div class="mb-3">
@@ -281,8 +281,8 @@
                         if (row) {
                             var paidCells = row.querySelectorAll('.cs-paid');
                             var balCells = row.querySelectorAll('.cs-balance');
-                            if (paidCells.length) paidCells[0].textContent = 'UGX ' + Number(s.paid_amount).toLocaleString('en-UG', {minimumFractionDigits:0});
-                            if (balCells.length) balCells[0].textContent = 'UGX ' + Number(s.balance).toLocaleString('en-UG', {minimumFractionDigits:0});
+                            if (paidCells.length) paidCells[0].textContent = window.businessCurrency + ' ' + Number(s.paid_amount).toLocaleString('en-UG', {minimumFractionDigits:0});
+                            if (balCells.length) balCells[0].textContent = window.businessCurrency + ' ' + Number(s.balance).toLocaleString('en-UG', {minimumFractionDigits:0});
                         }
                     });
                 }

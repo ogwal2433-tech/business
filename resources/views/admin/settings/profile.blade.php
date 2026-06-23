@@ -44,6 +44,14 @@
                     </div>
                 </div>
 
+                <div class="row g-4 mt-2">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ __('Currency') }}</label>
+                        <input type="text" name="currency" class="form-control" value="{{ old('currency', $user->getRawOriginal('currency') ?? 'UGX') }}" maxlength="10" placeholder="UGX">
+                        <div class="form-text text-muted small">{{ __('Enter currency code (e.g., UGX, USD, KES, TZS)') }}</div>
+                    </div>
+                </div>
+
                 <hr class="my-4">
                 <h5 class="fw-semibold mb-3">{{ __('Password') }}</h5>
 

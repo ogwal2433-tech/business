@@ -90,7 +90,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="card-title text-white-50 mb-1">Total Sales</h6>
-              <h3 class="fw-bold mb-0">UGX {{ number_format($totalSalesAmount, 0) }}</h3>
+              <h3 class="fw-bold mb-0">{{ businessCurrency() }} {{ number_format($totalSalesAmount, 0) }}</h3>
               <small class="text-white-70">{{ $groupedByEmployee->count() }} employees</small>
             </div>
           </div>
@@ -167,7 +167,7 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                   <span class="badge bg-success fs-6 py-2 px-3">
-                    Total Sales: UGX {{ number_format($data['total_sales'], 0) }}
+                    Total Sales: {{ businessCurrency() }} {{ number_format($data['total_sales'], 0) }}
                   </span>
                 </div>
               </div>
@@ -190,13 +190,13 @@
                         <i class="bi bi-box me-2 text-primary"></i>{{ $productName }}
                       </td>
                       <td>
-                        <span class="fw-semibold">UGX {{ number_format($productData['price'], 0) }}</span>
+                        <span class="fw-semibold">{{ businessCurrency() }} {{ number_format($productData['price'], 0) }}</span>
                       </td>
                       <td>
                         <span class="badge bg-primary rounded-pill">{{ number_format($productData['quantity_sold']) }}</span>
                       </td>
                       <td class="text-end pe-4 fw-bold text-success">
-                        UGX {{ number_format($productData['total_sales'], 0) }}
+                        {{ businessCurrency() }} {{ number_format($productData['total_sales'], 0) }}
                       </td>
                     </tr>
                   @endforeach
@@ -290,7 +290,7 @@
                       </td>
                       <td>
                         <span class="badge bg-danger rounded-pill">
-                          UGX {{ number_format($expense->amount, 0) }}
+                          {{ businessCurrency() }} {{ number_format($expense->amount, 0) }}
                         </span>
                       </td>
                       <td class="pe-4">
