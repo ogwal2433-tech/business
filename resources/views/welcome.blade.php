@@ -1073,7 +1073,7 @@
             <a href="#testimonials">{{ __('Testimonials') }}</a>
             <a href="{{ route('login') }}">{{ __('Sign In') }}</a>
             <a href="{{ route('register') }}" class="btn-primary">{{ __('Get Started') }} <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
-            <a href="{{ route('app.download', ['platform' => 'windows']) }}" class="btn-desktop-nav" id="desktop-download-btn"><i class="fas fa-download"></i> {{ __('Desktop App') }}</a>
+            <a href="{{ route('app.download', ['platform' => 'windows']) }}" class="btn-desktop-nav" id="desktop-download-btn"><i class="fas fa-download"></i> {{ __('Get Desktop App') }}</a>
         </div>
     </nav>
 
